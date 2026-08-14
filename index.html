@@ -128,7 +128,7 @@
   <div id="scrApp" class="hidden">
     <div class="who"><span id="whoAmI"></span><button class="linkbtn" id="signOut">Sign out</button></div>
 
-    <div class="eyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
+    <div class="eyebrow" id="basisEyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
     <h1>Fill up now, or hold for Monday?</h1>
 
     <div class="totem">
@@ -152,7 +152,7 @@
     <div id="paneRates">
       <button class="btn primary" id="addRate">Log Friday's rate</button>
       <div class="form hidden" id="rateForm">
-        <div class="field"><label class="label" for="rateVal">Card cost ex VAT (&pound; per litre)</label>
+        <div class="field"><label class="label" for="rateVal"><span id="rateValLabel">Card cost ex VAT</span> (&pound; per litre)</label>
           <input class="input" id="rateVal" type="number" step="0.0001" inputmode="decimal" placeholder="1.4364">
           <div class="hint" id="rateCalc"></div></div>
         <div class="field"><label class="label" for="rateWeek">Week it takes effect</label>
@@ -209,7 +209,8 @@
         <div class="eyebrow">Outstanding &middot; unpaid</div>
         <div class="big owed" id="balOwed" style="margin-top:10px">&pound;0.00</div>
         <div class="hint" id="balOwedSub" style="margin-top:8px"></div>
-        <div class="kv" style="margin-top:14px"><span>This week's payment <em style="font-style:normal;opacity:.7">(last Mon&ndash;Sun)</em></span><b id="balThisWk">&pound;0.00</b></div>
+        <div class="kv" style="margin-top:14px" id="vatRow"><span>VAT included in that</span><b id="balVat">&pound;0.00</b></div>
+        <div class="kv"><span>This week's payment <em style="font-style:normal;opacity:.7">(last Mon&ndash;Sun)</em></span><b id="balThisWk">&pound;0.00</b></div>
         <div class="kv"><span>Next week's payment <em style="font-style:normal;opacity:.7">(this Mon&ndash;Sun)</em></span><b id="balNextWk">&pound;0.00</b></div>
         <div class="kv"><span>Spent this month</span><b id="balThisMo">&pound;0.00</b></div>
         <div class="kv"><span>Spent last month</span><b id="balLastMo">&pound;0.00</b></div>
@@ -233,6 +234,13 @@
       </div>
       <div class="section"><div class="eyebrow">Service charges</div><div class="eyebrow" id="chargeCount">0</div></div>
       <div class="rule"></div><div id="chargeBlock"></div>
+      <div class="settings"><span>Show prices</span>
+        <span class="cardsel" style="margin-top:0;flex:0 0 auto">
+          <button id="basisEx" aria-pressed="true">Ex VAT</button>
+          <button id="basisInc" aria-pressed="false">Inc VAT</button>
+        </span>
+      </div>
+      <div class="hint" id="basisHint" style="margin-top:-8px"></div>
       <div class="settings"><span>VAT rate</span>
         <span class="row"><input class="input" id="vatInput" type="number" step="1" inputmode="decimal" style="width:70px;padding:7px 10px;font-size:14px"><button class="linkbtn" id="vatSave">%</button></span>
       </div>
@@ -265,7 +273,7 @@ var SUPABASE_ANON_KEY = "sb_publishable_k0my-XZ-Lck-OCDJIxsoCQ_7FgQzbVm";
 "use strict";
 var DAY=86400000;
 var sb=null, user=null, busy=false;
-var state={vat:0.20,cards:["Mine"],rates:[],fills:[],charges:[]};
+var state={vat:0.20,cards:["Mine"],rates:[],fills:[],charges:[],showIncVat:false};
 var view="all", mode="signin";
 var $=function(id){return document.getElementById(id)};
 
@@ -335,14 +343,14 @@ function doReset(){
 /* ---------- data layer ---------- */
 function loadAll(){
   return Promise.all([
-    sb.from("settings").select("vat,cards").eq("user_id",user.id).maybeSingle(),
+    sb.from("settings").select("vat,cards,show_inc_vat").eq("user_id",user.id).maybeSingle(),
     sb.from("rates").select("id,week_start,ex_vat").order("week_start",{ascending:false}),
     sb.from("fills").select("*").order("fill_date",{ascending:false}),
     sb.from("charges").select("*")
   ]).then(function(res){
     res.forEach(function(r){if(r.error)throw r.error;});
     var s=res[0].data;
-    if(s){state.vat=Number(s.vat);state.cards=(Array.isArray(s.cards)&&s.cards.length)?s.cards:["Mine"];}
+    if(s){state.vat=Number(s.vat);state.cards=(Array.isArray(s.cards)&&s.cards.length)?s.cards:["Mine"];state.showIncVat=!!s.show_inc_vat;}
     else{return sb.from("settings").insert({user_id:user.id}).then(function(){});}
   }).then(function(){
     return Promise.all([
@@ -365,12 +373,17 @@ function guard(p,onOk){
   p.then(function(r){busy=false;if(r&&r.error)throw r.error;if(onOk)onOk(r);})
    .catch(function(e){busy=false;alert("Couldn't save: "+e.message);});
 }
-function saveSettings(){return sb.from("settings").upsert({user_id:user.id,vat:state.vat,cards:state.cards});}
+function saveSettings(){return sb.from("settings").upsert({user_id:user.id,vat:state.vat,cards:state.cards,show_inc_vat:state.showIncVat});}
 
 /* ---------- derived ---------- */
 function rateFor(d){var wk=iso(mondayOf(fromIso(d)));
   var m=state.rates.filter(function(r){return r.weekStart===wk})[0];return m?m.exVat:null;}
 function incVat(ex){return ex*(1+state.vat);}
+function exVat(inc){return inc/(1+state.vat);}
+function shown(ex){return state.showIncVat?incVat(ex):ex;}
+function basis(){return state.showIncVat?"inc VAT":"ex VAT";}
+function otherBasis(){return state.showIncVat?"ex VAT":"inc VAT";}
+function other(ex){return state.showIncVat?ex:incVat(ex);}
 function fillCost(f){var ex=(typeof f.exVat==="number"&&f.exVat)?f.exVat:rateFor(f.date);
   return ex===null?null:f.litres*incVat(ex);}
 function fillSaving(f){var c=fillCost(f);if(c===null||!f.forecourt)return null;return f.litres*f.forecourt-c;}
@@ -383,20 +396,26 @@ function avgLitres(){var f=visibleFills().slice().sort(function(a,b){return a.da
 
 /* ---------- render ---------- */
 function render(){renderTotem();renderRates();renderTrend();renderCardSel();renderFills();renderBalance();
-  $("vatInput").value=Math.round(state.vat*100);}
+  $("vatInput").value=Math.round(state.vat*100);
+  $("basisEx").setAttribute("aria-pressed",!state.showIncVat);
+  $("basisInc").setAttribute("aria-pressed",state.showIncVat);
+  $("basisHint").textContent=state.showIncVat
+    ? "Rates are shown and entered including VAT \u2014 the price you actually pay. Choose this if you're not VAT registered."
+    : "Rates are shown and entered excluding VAT, as they appear on your statement. Choose this if you reclaim VAT.";}
 
 function renderTotem(){
   var today=new Date(),tm=new Date(today.getFullYear(),today.getMonth(),today.getDate());
   var thisMon=mondayOf(today),nextMon=new Date(thisMon.getTime()+7*DAY);
   var cur=state.rates.filter(function(r){return r.weekStart===iso(thisMon)})[0];
   var nxt=state.rates.filter(function(r){return r.weekStart===iso(nextMon)})[0];
-  $("curNum").textContent=cur?cur.exVat.toFixed(4):"\u2014";
+  $("basisEyebrow").innerHTML="Fuel card &middot; &pound; per litre "+basis();
+  $("curNum").textContent=cur?shown(cur.exVat).toFixed(4):"\u2014";
   $("curNum").className="num"+(cur?"":" dim");
-  $("curSub").textContent=cur?money(incVat(cur.exVat))+"/L inc VAT":"not logged";
+  $("curSub").textContent=cur?money(other(cur.exVat))+"/L "+otherBasis():"not logged";
   var days=Math.round((nextMon-tm)/DAY);
-  $("nextNum").textContent=nxt?nxt.exVat.toFixed(4):"\u2014";
+  $("nextNum").textContent=nxt?shown(nxt.exVat).toFixed(4):"\u2014";
   $("nextNum").className="num"+(nxt?"":" dim");
-  $("nextSub").textContent=nxt?(money(incVat(nxt.exVat))+"/L \u00b7 "+(days>0?"in "+days+"d":"live")):"awaiting email";
+  $("nextSub").textContent=nxt?(money(other(nxt.exVat))+"/L \u00b7 "+(days>0?"in "+days+"d":"live")):"awaiting email";
   var cls="idle",text="Log this week's rate to get started",sub="";
   if(cur&&!nxt){text="No new rate in yet";sub="Friday's email sets the rate for the week beginning "+shortDate(iso(nextMon))+".";}
   else if(cur&&nxt){
@@ -421,7 +440,7 @@ function renderRates(){
     var c=d===null||Math.abs(d)<0.0005?"same":d>0?"up":"down";
     var li=document.createElement("li");
     var w=document.createElement("span");w.className="hist-week";w.textContent="w/c "+shortDate(e.weekStart);
-    var p=document.createElement("span");p.className="hist-price";p.textContent=e.exVat.toFixed(4);
+    var p=document.createElement("span");p.className="hist-price";p.textContent=shown(e.exVat).toFixed(4);
     var dl=document.createElement("span");dl.className="delta "+c;
     dl.textContent=d===null?"\u2014":(d>0?"\u25b2 ":d<0?"\u25bc ":"= ")+(Math.abs(d)*100).toFixed(2)+"p";
     var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
@@ -447,7 +466,7 @@ function renderTrend(){
   var dots=pts.map(function(p){return'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="#0C181C" stroke="#F2B33D" stroke-width="1.6"/>'}).join("");
   $("trend").innerHTML='<defs><linearGradient id="fcA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2B33D" stop-opacity="0.28"/><stop offset="100%" stop-color="#F2B33D" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#fcA)"/><path d="'+line+'" fill="none" stroke="#F2B33D" stroke-width="2" stroke-linejoin="round"/>'+dots;
   $("trendLabel").textContent="Last "+data.length+" weeks";
-  $("trendRange").textContent=Math.min.apply(null,vals).toFixed(4)+" \u2013 "+Math.max.apply(null,vals).toFixed(4);
+  $("trendRange").textContent=shown(Math.min.apply(null,vals)).toFixed(4)+" \u2013 "+shown(Math.max.apply(null,vals)).toFixed(4);
 }
 
 function renderCardSel(){
@@ -499,6 +518,8 @@ function renderBalance(){
   state.charges.filter(inView).forEach(function(c){if(!c.paid)owed+=c.amount;});
   $("balOwed").textContent=money(owed);
   $("balOwedSub").textContent=unpriced?unpriced+" unpaid fill-up"+(unpriced===1?"":"s")+" have no rate logged and aren't counted.":"Everything with a rate logged is counted.";
+  $("balVat").textContent=money(owed-owed/(1+state.vat));
+  $("vatRow").classList.toggle("hidden",state.showIncVat);
   $("balThisWk").textContent=money(sumBetween(iso(lastMon),iso(lastSun)));
   $("balNextWk").textContent=money(sumBetween(iso(thisMon),iso(thisSun)));
   $("balThisMo").textContent=money(sumBetween(iso(new Date(now.getFullYear(),now.getMonth(),1)),iso(new Date(now.getFullYear(),now.getMonth()+1,0))));
@@ -536,18 +557,22 @@ function renderBalance(){
 function openRate(){var tm=mondayOf(new Date()),nm=new Date(tm.getTime()+7*DAY);
   $("rateWeek").value=iso(state.rates.length===0?tm:nm);rateHint();$("rateVal").value="";
   msg($("rateErr"),"","warn");$("rateCalc").textContent="";
+  $("rateValLabel").textContent="Card cost "+basis();
   $("rateForm").classList.remove("hidden");$("addRate").classList.add("hidden");$("rateVal").focus();}
 function rateHint(){var v=$("rateWeek").value;
   $("rateHint").textContent=v?"Snaps to the Monday. Runs "+shortDate(v)+" to the Sunday.":"";}
 function rateCalc(){var v=parseFloat($("rateVal").value);
-  $("rateCalc").textContent=isNaN(v)||v<=0?"":"= "+money(incVat(v))+" a litre inc VAT at "+Math.round(state.vat*100)+"%.";}
+  if(isNaN(v)||v<=0){$("rateCalc").textContent="";return;}
+  var conv=state.showIncVat?exVat(v):incVat(v);
+  $("rateCalc").textContent="= "+money(conv)+" a litre "+otherBasis()+" at "+Math.round(state.vat*100)+"% VAT.";}
 function saveRate(){
   var v=parseFloat($("rateVal").value),err="";
-  if(isNaN(v)||v<=0)err="Enter the ex-VAT rate in pounds, like 1.4364";
+  if(isNaN(v)||v<=0)err="Enter the "+basis()+" rate in pounds, like "+(state.showIncVat?"1.7237":"1.4364");
   else if(v>5)err="That looks like pence. Enter pounds per litre, like 1.4364";
   else if(!$("rateWeek").value)err="Pick the week this rate starts.";
   if(err){msg($("rateErr"),err,"warn");return;}
   var wk=iso(mondayOf(fromIso($("rateWeek").value)));
+  if(state.showIncVat)v=exVat(v);
   guard(sb.from("rates").upsert({user_id:user.id,week_start:wk,ex_vat:+v.toFixed(4)},{onConflict:"user_id,week_start"}).select(),
     function(r){
       state.rates=state.rates.filter(function(x){return x.weekStart!==wk});
@@ -704,6 +729,10 @@ $("vatSave").addEventListener("click",function(){
   var v=parseFloat($("vatInput").value);
   if(isNaN(v)||v<0||v>=100)return;
   state.vat=v/100;guard(saveSettings(),function(){render();});});
+function setBasis(inc){if(state.showIncVat===inc)return;state.showIncVat=inc;
+  guard(saveSettings(),function(){render();});}
+$("basisEx").addEventListener("click",function(){setBasis(false)});
+$("basisInc").addEventListener("click",function(){setBasis(true)});
 $("exportBtn").addEventListener("click",exportData);
 $("importBtn").addEventListener("click",function(){$("importFile").click()});
 $("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
