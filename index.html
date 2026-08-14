@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Fuel Card Tracker</title>
+<meta name="theme-color" content="#0C181C">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fuel Card">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C181C'/%3E%3Ctext x='90' y='118' font-family='monospace' font-size='74' font-weight='700' fill='%23F2B33D' text-anchor='middle'%3Ep%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forecourt: #0C181C;
+    --slick: #14262C;
+    --edge: #233D45;
+    --ink: #E6F0F1;
+    --mute: #7D9AA2;
+    --amber: #F2B33D;
+    --go: #45D6A0;
+    --stop: #FF7A66;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(120% 60% at 50% -10%, rgba(69,214,160,0.10), transparent 60%),
+      radial-gradient(90% 50% at 90% 0%, rgba(242,179,61,0.08), transparent 55%),
+      var(--forecourt);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', ui-sans-serif, -apple-system, sans-serif;
+    padding: max(26px, env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));
+    -webkit-text-size-adjust: 100%;
+  }
+  .wrap { max-width: 460px; margin: 0 auto; }
+
+  .eyebrow {
+    font-family: 'Archivo', sans-serif;
+    font-size: 11px; font-weight: 700; letter-spacing: .22em;
+    text-transform: uppercase; color: var(--mute);
+  }
+  h1 {
+    font-family: 'Archivo', sans-serif;
+    font-size: 27px; font-weight: 800; letter-spacing: -.02em;
+    margin: 5px 0 22px; line-height: 1.1;
+  }
+
+  /* totem */
+  .totem {
+    border: 1px solid var(--edge); border-radius: 14px;
+    background: linear-gradient(180deg, var(--slick), #0F1F24);
+    overflow: hidden;
+  }
+  .cells { display: grid; grid-template-columns: 1fr 1fr; }
+  .cell { padding: 20px 16px 18px; text-align: center; }
+  .cell + .cell { border-left: 1px solid var(--edge); }
+  .cell-label {
+    font-family: 'Archivo', sans-serif; font-size: 10px; font-weight: 700;
+    letter-spacing: .18em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px;
+  }
+  .num {
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-variant-numeric: tabular-nums; font-weight: 700;
+    font-size: 40px; line-height: 1; letter-spacing: -.03em;
+    color: var(--amber); text-shadow: 0 0 22px rgba(242,179,61,.34);
+  }
+  .num.dim { color: var(--mute); text-shadow: none; opacity: .75; }
+  .unit { font-size: 15px; font-weight: 600; margin-left: 2px; }
+  .cell-sub { font-size: 11px; color: var(--mute); margin-top: 8px; }
+
+  .bar { padding: 15px 16px; border-top: 1px solid var(--edge); display: flex; align-items: flex-start; gap: 12px; }
+  .lamp { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; margin-top: 5px; background: var(--edge); }
+  .bar-text { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 15px; }
+  .bar-sub { font-size: 12px; color: var(--mute); margin-top: 3px; line-height: 1.45; }
+  .bar.wait { background: rgba(69,214,160,.09); }
+  .bar.wait .lamp { background: var(--go); box-shadow: 0 0 12px var(--go); }
+  .bar.wait .bar-text { color: var(--go); }
+  .bar.fill { background: rgba(255,122,102,.09); }
+  .bar.fill .lamp { background: var(--stop); box-shadow: 0 0 12px var(--stop); }
+  .bar.fill .bar-text { color: var(--stop); }
+  .bar.flat .lamp { background: var(--mute); }
+  .bar.idle .bar-text { color: var(--mute); font-weight: 500; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; }
+
+  /* controls */
+  button {
+    font-family: 'Archivo', sans-serif; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn {
+    width: 100%; margin-top: 14px; padding: 15px; border-radius: 12px;
+    border: 1px solid var(--edge); background: var(--slick); color: var(--ink);
+    font-weight: 700; font-size: 14px; letter-spacing: .02em;
+    transition: background .15s, border-color .15s;
+  }
+  .btn:hover { background: #1A2F36; border-color: #2F535D; }
+  .btn.primary { background: var(--amber); color: #10201B; border-color: var(--amber); }
+  .btn.primary:hover { background: #FFC658; }
+  :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+
+  .form { margin-top: 14px; padding: 16px; border: 1px solid var(--edge); border-radius: 12px; background: var(--slick); }
+  .field { margin-bottom: 13px; }
+  .label {
+    display: block; font-size: 11px; font-weight: 600; color: var(--mute);
+    text-transform: uppercase; letter-spacing: .13em; margin-bottom: 7px;
+    font-family: 'Archivo', sans-serif;
+  }
+  .input {
+    width: 100%; padding: 13px 14px; border-radius: 10px;
+    border: 1px solid var(--edge); background: #0D1C21; color: var(--ink);
+    font-family: 'IBM Plex Mono', monospace; font-size: 17px;
+    font-variant-numeric: tabular-nums;
+  }
+  .hint { font-size: 11.5px; color: var(--mute); margin-top: 6px; line-height: 1.45; }
+  .row { display: flex; gap: 9px; }
+  .row .btn { margin-top: 0; }
+
+  .section { margin-top: 30px; display: flex; align-items: baseline; justify-content: space-between; }
+  .rule { height: 1px; background: var(--edge); margin: 10px 0 14px; }
+
+  ul.hist { list-style: none; padding: 0; margin: 0; }
+  ul.hist li { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid rgba(35,61,69,.6); }
+  .hist-week { font-size: 13px; color: var(--mute); width: 96px; flex: 0 0 auto; }
+  .hist-price { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; flex: 1; }
+  .delta { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .delta.up { color: var(--stop); }
+  .delta.down { color: var(--go); }
+  .delta.same { color: var(--mute); }
+  .icon { background: none; border: none; color: var(--mute); font-size: 19px; padding: 4px 8px; line-height: 1; border-radius: 6px; }
+  .icon:hover { color: var(--stop); }
+
+  .empty { border: 1px dashed var(--edge); border-radius: 12px; padding: 22px 18px; text-align: center; color: var(--mute); font-size: 13.5px; line-height: 1.55; }
+  .settings { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--mute); }
+  .linkbtn { background: none; border: none; color: var(--amber); font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; padding: 4px; border-radius: 6px; }
+  .warn { margin-top: 14px; padding: 11px 13px; border-radius: 10px; background: rgba(255,122,102,.1); border: 1px solid rgba(255,122,102,.3); color: var(--stop); font-size: 12.5px; }
+  .hidden { display: none !important; }
+  .backup { margin-top: 18px; display: flex; gap: 16px; font-size: 12.5px; }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="eyebrow">Fuel card · pence per litre</div>
+  <h1>Fill up now, or hold for Monday?</h1>
+
+  <div class="totem">
+    <div class="cells">
+      <div class="cell">
+        <div class="cell-label">Now &rarr; Sunday</div>
+        <div class="num dim" id="curNum">&ndash;&ndash;.&ndash;<span class="unit">p</span></div>
+        <div class="cell-sub" id="curSub">not logged</div>
+      </div>
+      <div class="cell">
+        <div class="cell-label">From Monday</div>
+        <div class="num dim" id="nextNum">&ndash;&ndash;.&ndash;<span class="unit">p</span></div>
+        <div class="cell-sub" id="nextSub">awaiting email</div>
+      </div>
+    </div>
+    <div class="bar idle" id="bar">
+      <span class="lamp"></span>
+      <span>
+        <div class="bar-text" id="barText">Log this week's rate to get started</div>
+        <div class="bar-sub" id="barSub"></div>
+      </span>
+    </div>
+  </div>
+
+  <button class="btn primary" id="addBtn">Log a price</button>
+
+  <div class="form hidden" id="form">
+    <div class="field">
+      <label class="label" for="price">Price in pence per litre</label>
+      <input class="input" id="price" type="number" step="0.1" inputmode="decimal" placeholder="132.4">
+    </div>
+    <div class="field">
+      <label class="label" for="week">Week it takes effect</label>
+      <input class="input" id="week" type="date">
+      <div class="hint" id="weekHint"></div>
+    </div>
+    <div class="warn hidden" id="formErr"></div>
+    <div class="row" style="margin-top:16px">
+      <button class="btn primary" id="saveBtn">Save price</button>
+      <button class="btn" id="cancelBtn" style="flex:0 0 100px">Cancel</button>
+    </div>
+  </div>
+
+  <div id="trendBlock" class="hidden">
+    <div class="section">
+      <div class="eyebrow" id="trendLabel">Trend</div>
+      <div class="eyebrow" id="trendRange"></div>
+    </div>
+    <div class="rule"></div>
+    <svg id="trend" viewBox="0 0 424 92" width="100%" height="92" role="img" aria-label="Price trend"></svg>
+  </div>
+
+  <div class="section">
+    <div class="eyebrow">Price history</div>
+    <div class="eyebrow" id="histCount">0 weeks</div>
+  </div>
+  <div class="rule"></div>
+  <div id="histBlock"></div>
+
+  <div class="settings">
+    <span>Savings based on a <b id="tankLabel">80</b>-litre fill</span>
+    <span id="tankIdle"><button class="linkbtn" id="tankEdit">Change</button></span>
+    <span id="tankForm" class="row hidden">
+      <input class="input" id="tankInput" type="number" inputmode="decimal" style="width:84px;padding:7px 10px;font-size:14px">
+      <button class="linkbtn" id="tankDone">Done</button>
+    </span>
+  </div>
+
+  <div class="backup">
+    <button class="linkbtn" id="exportBtn" style="padding:0">Save a backup</button>
+    <button class="linkbtn" id="importBtn" style="padding:0">Restore from backup</button>
+    <input type="file" id="importFile" accept="application/json" class="hidden">
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var DAY = 86400000;
+  var KEY = "fuelcard.v1";
+  var state = { entries: [], tank: 80 };
+
+  /* ---------- dates ---------- */
+  function mondayOf(d) {
+    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+    return x;
+  }
+  function iso(d) {
+    var p = function (n) { return String(n).padStart(2, "0"); };
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
+  }
+  function fromIso(s) {
+    var a = s.split("-").map(Number);
+    return new Date(a[0], a[1] - 1, a[2]);
+  }
+  function shortDate(s) {
+    return fromIso(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
+  }
+
+  /* ---------- storage ---------- */
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (!raw) return;
+      var s = JSON.parse(raw);
+      if (s && Array.isArray(s.entries)) state.entries = s.entries;
+      if (s && typeof s.tank === "number" && s.tank > 0) state.tank = s.tank;
+    } catch (e) { /* start fresh */ }
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(state));
+      return true;
+    } catch (e) { return false; }
+  }
+
+  /* ---------- elements ---------- */
+  var $ = function (id) { return document.getElementById(id); };
+
+  /* ---------- render ---------- */
+  function render() {
+    var today = new Date();
+    var todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    var thisMon = mondayOf(today);
+    var nextMon = new Date(thisMon.getTime() + 7 * DAY);
+
+    var cur = state.entries.filter(function (e) { return e.weekStart === iso(thisMon); })[0];
+    var nxt = state.entries.filter(function (e) { return e.weekStart === iso(nextMon); })[0];
+
+    $("curNum").innerHTML = (cur ? cur.pence.toFixed(1) : "&ndash;&ndash;.&ndash;") + '<span class="unit">p</span>';
+    $("curNum").className = "num" + (cur ? "" : " dim");
+    $("curSub").textContent = cur ? "w/c " + shortDate(cur.weekStart) : "not logged";
+
+    var days = Math.round((nextMon - todayMid) / DAY);
+    $("nextNum").innerHTML = (nxt ? nxt.pence.toFixed(1) : "&ndash;&ndash;.&ndash;") + '<span class="unit">p</span>';
+    $("nextNum").className = "num" + (nxt ? "" : " dim");
+    $("nextSub").textContent = nxt
+      ? (days > 0 ? "live in " + days + " day" + (days === 1 ? "" : "s") : "live now")
+      : "awaiting email";
+
+    var cls = "idle", text = "Log this week's rate to get started", sub = "";
+    if (cur && !nxt) {
+      text = "No new rate in yet";
+      sub = "Friday's email sets the price for the week beginning " + shortDate(iso(nextMon)) + ".";
+    } else if (cur && nxt) {
+      var diff = +(nxt.pence - cur.pence).toFixed(2);
+      var swing = Math.abs(diff);
+      var money = (swing * state.tank) / 100;
+      if (swing < 0.05) {
+        cls = "flat";
+        text = "No real change";
+        sub = "Same rate either side of the weekend — fill whenever suits.";
+      } else if (diff < 0) {
+        cls = "wait";
+        text = "Hold on — fill after Monday";
+        sub = "Dropping " + swing.toFixed(1) + "p a litre. Waiting saves about £" +
+              money.toFixed(2) + " on a " + state.tank + "-litre fill.";
+      } else {
+        cls = "fill";
+        text = "Fill up before Sunday night";
+        sub = "Rising " + swing.toFixed(1) + "p a litre. Filling now saves about £" +
+              money.toFixed(2) + " on a " + state.tank + "-litre fill.";
+      }
+    }
+    $("bar").className = "bar " + cls;
+    $("barText").textContent = text;
+    $("barSub").textContent = sub;
+
+    renderHistory();
+    renderTrend();
+    $("tankLabel").textContent = state.tank;
+  }
+
+  function renderHistory() {
+    var sorted = state.entries.slice().sort(function (a, b) {
+      return a.weekStart < b.weekStart ? 1 : -1;
+    });
+    $("histCount").textContent = sorted.length + (sorted.length === 1 ? " week" : " weeks");
+
+    if (!sorted.length) {
+      $("histBlock").innerHTML =
+        '<div class="empty">Nothing logged yet. Add the rate you\'re on this week, ' +
+        "then add Friday's new one — the panel above will tell you which side of " +
+        "the weekend to fill on.</div>";
+      return;
+    }
+
+    var ul = document.createElement("ul");
+    ul.className = "hist";
+    sorted.forEach(function (e, i) {
+      var prev = sorted[i + 1];
+      var d = prev ? +(e.pence - prev.pence).toFixed(2) : null;
+      var c = d === null || Math.abs(d) < 0.05 ? "same" : d > 0 ? "up" : "down";
+      var mark = d === null ? "—" : (d > 0 ? "▲ " : d < 0 ? "▼ " : "= ") + Math.abs(d).toFixed(1) + "p";
+
+      var li = document.createElement("li");
+
+      var w = document.createElement("span");
+      w.className = "hist-week";
+      w.textContent = "w/c " + shortDate(e.weekStart);
+
+      var p = document.createElement("span");
+      p.className = "hist-price";
+      p.textContent = e.pence.toFixed(1) + "p";
+
+      var dl = document.createElement("span");
+      dl.className = "delta " + c;
+      dl.textContent = mark;
+
+      var b = document.createElement("button");
+      b.className = "icon";
+      b.textContent = "×";
+      b.setAttribute("aria-label", "Delete price for week commencing " + shortDate(e.weekStart));
+      b.addEventListener("click", function () {
+        state.entries = state.entries.filter(function (x) { return x.weekStart !== e.weekStart; });
+        save();
+        render();
+      });
+
+      li.appendChild(w); li.appendChild(p); li.appendChild(dl); li.appendChild(b);
+      ul.appendChild(li);
+    });
+
+    $("histBlock").innerHTML = "";
+    $("histBlock").appendChild(ul);
+  }
+
+  function renderTrend() {
+    var data = state.entries.slice().sort(function (a, b) {
+      return a.weekStart < b.weekStart ? -1 : 1;
+    }).slice(-10);
+
+    if (data.length < 2) { $("trendBlock").classList.add("hidden"); return; }
+    $("trendBlock").classList.remove("hidden");
+
+    var W = 424, H = 92, pad = 6;
+    var vals = data.map(function (d) { return d.pence; });
+    var lo = Math.min.apply(null, vals) - 0.6;
+    var hi = Math.max.apply(null, vals) + 0.6;
+    var span = (hi - lo) || 1;
+    var step = (W - pad * 2) / Math.max(data.length - 1, 1);
+
+    var pts = data.map(function (d, i) {
+      return [pad + i * step, pad + (1 - (d.pence - lo) / span) * (H - pad * 2)];
+    });
+    var line = pts.map(function (p, i) {
+      return (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1);
+    }).join(" ");
+    var area = line + " L" + pts[pts.length - 1][0].toFixed(1) + "," + H +
+               " L" + pts[0][0].toFixed(1) + "," + H + " Z";
+
+    var dots = pts.map(function (p) {
+      return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) +
+             '" r="2.6" fill="#0C181C" stroke="#F2B33D" stroke-width="1.6"/>';
+    }).join("");
+
+    $("trend").innerHTML =
+      '<defs><linearGradient id="fcArea" x1="0" y1="0" x2="0" y2="1">' +
+      '<stop offset="0%" stop-color="#F2B33D" stop-opacity="0.28"/>' +
+      '<stop offset="100%" stop-color="#F2B33D" stop-opacity="0"/></linearGradient></defs>' +
+      '<path d="' + area + '" fill="url(#fcArea)"/>' +
+      '<path d="' + line + '" fill="none" stroke="#F2B33D" stroke-width="2" stroke-linejoin="round"/>' +
+      dots;
+
+    $("trendLabel").textContent = "Last " + data.length + " weeks";
+    $("trendRange").textContent =
+      Math.min.apply(null, vals).toFixed(1) + "p – " + Math.max.apply(null, vals).toFixed(1) + "p";
+  }
+
+  /* ---------- form ---------- */
+  function openForm() {
+    var thisMon = mondayOf(new Date());
+    var nextMon = new Date(thisMon.getTime() + 7 * DAY);
+    $("week").value = iso(state.entries.length === 0 ? thisMon : nextMon);
+    updateWeekHint();
+    $("price").value = "";
+    $("formErr").classList.add("hidden");
+    $("form").classList.remove("hidden");
+    $("addBtn").classList.add("hidden");
+    $("price").focus();
+  }
+  function closeForm() {
+    $("form").classList.add("hidden");
+    $("addBtn").classList.remove("hidden");
+  }
+  function updateWeekHint() {
+    var v = $("week").value;
+    $("weekHint").textContent = v
+      ? "Snaps to the Monday. This rate runs " + shortDate(v) + " through to the Sunday."
+      : "";
+  }
+  function submit() {
+    var p = parseFloat($("price").value);
+    var err = "";
+    if (isNaN(p) || p <= 0) err = "Enter the price in pence, like 132.4";
+    else if (p < 20 || p > 400) err = "That looks off for pence per litre. Check the figure.";
+    else if (!$("week").value) err = "Pick the week this rate starts.";
+
+    if (err) {
+      $("formErr").textContent = err;
+      $("formErr").classList.remove("hidden");
+      return;
+    }
+    var wk = iso(mondayOf(fromIso($("week").value)));
+    state.entries = state.entries.filter(function (e) { return e.weekStart !== wk; });
+    state.entries.push({ weekStart: wk, pence: +p.toFixed(2) });
+
+    if (!save()) {
+      $("formErr").textContent = "That didn't save. Your browser is blocking storage — check private browsing is off.";
+      $("formErr").classList.remove("hidden");
+      return;
+    }
+    closeForm();
+    render();
+  }
+
+  /* ---------- backup ---------- */
+  function exportData() {
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "fuel-card-backup-" + iso(new Date()) + ".json";
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+  function importData(file) {
+    var r = new FileReader();
+    r.onload = function () {
+      try {
+        var s = JSON.parse(r.result);
+        if (!s || !Array.isArray(s.entries)) throw new Error("bad file");
+        state.entries = s.entries;
+        if (typeof s.tank === "number" && s.tank > 0) state.tank = s.tank;
+        save();
+        render();
+      } catch (e) {
+        alert("That file isn't a fuel card backup. Pick the .json file this app saved.");
+      }
+    };
+    r.readAsText(file);
+  }
+
+  /* ---------- wiring ---------- */
+  $("addBtn").addEventListener("click", openForm);
+  $("cancelBtn").addEventListener("click", closeForm);
+  $("saveBtn").addEventListener("click", submit);
+  $("price").addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
+  $("week").addEventListener("change", function () {
+    if ($("week").value) $("week").value = iso(mondayOf(fromIso($("week").value)));
+    updateWeekHint();
+  });
+
+  $("tankEdit").addEventListener("click", function () {
+    $("tankInput").value = state.tank;
+    $("tankIdle").classList.add("hidden");
+    $("tankForm").classList.remove("hidden");
+    $("tankInput").focus();
+  });
+  $("tankDone").addEventListener("click", function () {
+    var v = parseFloat($("tankInput").value);
+    if (!isNaN(v) && v > 0) { state.tank = v; save(); }
+    $("tankForm").classList.add("hidden");
+    $("tankIdle").classList.remove("hidden");
+    render();
+  });
+
+  $("exportBtn").addEventListener("click", exportData);
+  $("importBtn").addEventListener("click", function () { $("importFile").click(); });
+  $("importFile").addEventListener("change", function (e) {
+    if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
+    e.target.value = "";
+  });
+
+  load();
+  render();
+})();
+</script>
+</body>
+</html>
