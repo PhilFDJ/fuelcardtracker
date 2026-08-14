@@ -14,12 +14,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{--forecourt:#0C181C;--slick:#14262C;--edge:#233D45;--ink:#E6F0F1;--mute:#7D9AA2;--amber:#F2B33D;--go:#45D6A0;--stop:#FF7A66}
-  *{box-sizing:border-box}
-  html,body{height:100%}
+  *{box-sizing:border-box}html,body{height:100%}
   body{margin:0;background:radial-gradient(120% 60% at 50% -10%,rgba(69,214,160,.10),transparent 60%),radial-gradient(90% 50% at 90% 0%,rgba(242,179,61,.08),transparent 55%),var(--forecourt);background-attachment:fixed;color:var(--ink);font-family:'IBM Plex Sans',ui-sans-serif,-apple-system,sans-serif;padding:max(26px,env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
   .wrap{max-width:460px;margin:0 auto}
   .eyebrow{font-family:'Archivo',sans-serif;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
   h1{font-family:'Archivo',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em;margin:5px 0 20px;line-height:1.1}
+  h2{font-family:'Archivo',sans-serif;font-size:20px;font-weight:800;margin:0 0 6px}
   .totem{border:1px solid var(--edge);border-radius:14px;background:linear-gradient(180deg,var(--slick),#0F1F24);overflow:hidden}
   .cells{display:grid;grid-template-columns:1fr 1fr}
   .cell{padding:18px 14px 16px;text-align:center}
@@ -44,21 +44,21 @@
   .btn:hover{background:#1A2F36;border-color:#2F535D}
   .btn.primary{background:var(--amber);color:#10201B;border-color:var(--amber)}
   .btn.primary:hover{background:#FFC658}
+  .btn:disabled{opacity:.5;cursor:default}
   :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
   .form{margin-top:14px;padding:16px;border:1px solid var(--edge);border-radius:12px;background:var(--slick)}
   .field{margin-bottom:13px}
   .label{display:block;font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.13em;margin-bottom:7px;font-family:'Archivo',sans-serif}
   .input{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--edge);background:#0D1C21;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:16px;font-variant-numeric:tabular-nums}
   select.input,input.txt{font-family:'IBM Plex Sans',sans-serif;font-size:15px}
-  .hint{font-size:11.5px;color:var(--mute);margin-top:6px;line-height:1.45}
+  .hint{font-size:11.5px;color:var(--mute);margin-top:6px;line-height:1.5}
   .row{display:flex;gap:9px}.row .btn{margin-top:0}
   .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
   .section{margin-top:26px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
   .rule{height:1px;background:var(--edge);margin:10px 0 14px}
   .panel{margin-top:16px;padding:18px 16px;border:1px solid var(--edge);border-radius:14px;background:linear-gradient(180deg,var(--slick),#0F1F24)}
   .big{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:32px;font-weight:700;line-height:1;letter-spacing:-.02em}
-  .big.owed{color:var(--amber)}
-  .big.saved{color:var(--go)}
+  .big.owed{color:var(--amber)}.big.saved{color:var(--go)}
   .kv{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;font-size:13px;color:var(--mute);border-top:1px solid var(--edge)}
   .kv b{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;color:var(--ink)}
   ul.hist{list-style:none;padding:0;margin:0}
@@ -79,189 +79,309 @@
   .empty{border:1px dashed var(--edge);border-radius:12px;padding:20px 18px;text-align:center;color:var(--mute);font-size:13.5px;line-height:1.55}
   .settings{margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
   .linkbtn{background:none;border:none;color:var(--amber);font-size:13px;font-family:'IBM Plex Sans',sans-serif;padding:4px;border-radius:6px}
+  .linkbtn.danger{color:var(--stop)}
   .warn{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(255,122,102,.1);border:1px solid rgba(255,122,102,.3);color:var(--stop);font-size:12.5px;line-height:1.45}
+  .ok{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(69,214,160,.1);border:1px solid rgba(69,214,160,.3);color:var(--go);font-size:12.5px;line-height:1.45}
   .hidden{display:none!important}
   .backup{margin-top:20px;display:flex;gap:16px;font-size:12.5px;flex-wrap:wrap}
-  .cardsel{display:flex;gap:6px;margin-top:14px}
-  .cardsel button{flex:1;padding:9px 6px;border-radius:9px;border:1px solid var(--edge);background:none;color:var(--mute);font-size:12px;font-weight:700}
+  .cardsel{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
+  .cardsel button{flex:1 1 auto;min-width:70px;padding:9px 8px;border-radius:9px;border:1px solid var(--edge);background:none;color:var(--mute);font-size:12px;font-weight:700}
   .cardsel button[aria-pressed="true"]{background:var(--slick);color:var(--ink)}
+  .who{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:16px;font-size:12px;color:var(--mute)}
+  .spinner{text-align:center;color:var(--mute);padding:40px 0;font-size:13px}
+  .legal{margin-top:30px;padding-top:16px;border-top:1px solid var(--edge);font-size:11.5px;color:var(--mute);line-height:1.6}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
-  <h1>Fill up now, or hold for Monday?</h1>
 
-  <div class="totem">
-    <div class="cells">
-      <div class="cell">
-        <div class="cell-label">Now &rarr; Sunday</div>
-        <div class="num dim" id="curNum">&mdash;</div>
-        <div class="cell-sub" id="curSub">not logged</div>
-      </div>
-      <div class="cell">
-        <div class="cell-label">From Monday</div>
-        <div class="num dim" id="nextNum">&mdash;</div>
-        <div class="cell-sub" id="nextSub">awaiting email</div>
-      </div>
+  <!-- ===== NOT CONFIGURED ===== -->
+  <div id="scrSetup" class="hidden">
+    <div class="eyebrow">Setup needed</div>
+    <h1>Add your Supabase keys</h1>
+    <div class="empty" style="text-align:left">Open <b>index.html</b> and replace the two placeholder values near the top of the script with your Supabase project URL and anon key. You'll find both in Supabase under Settings &rarr; API.</div>
+  </div>
+
+  <!-- ===== AUTH ===== -->
+  <div id="scrAuth" class="hidden">
+    <div class="eyebrow">Fuel card tracker</div>
+    <h1 id="authTitle">Sign in</h1>
+    <div class="form" style="margin-top:0">
+      <div class="field"><label class="label" for="email">Email</label>
+        <input class="input txt" id="email" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com"></div>
+      <div class="field"><label class="label" for="pw">Password</label>
+        <input class="input txt" id="pw" type="password" autocomplete="current-password" placeholder="at least 8 characters"></div>
+      <div class="warn hidden" id="authErr"></div>
+      <div class="ok hidden" id="authOk"></div>
+      <button class="btn primary" id="authGo">Sign in</button>
+      <button class="btn" id="authSwap">Create an account instead</button>
+      <button class="linkbtn" id="authReset" style="width:100%;margin-top:12px">Forgot your password?</button>
     </div>
-    <div class="bar idle" id="bar"><span class="lamp"></span><span>
-      <div class="bar-text" id="barText">Log this week's rate to get started</div>
-      <div class="bar-sub" id="barSub"></div></span>
+    <div class="legal" id="privacy">
+      <b>What this stores.</b> Your email address, and the fuel data you enter: weekly rates, fill-up dates, litres, locations, prices and whether each one is paid. Nothing else &mdash; no card numbers, no payment details, no tracking.<br><br>
+      Your data is visible only to you. You can export it or delete your account and everything in it at any time from the Balance tab.
     </div>
   </div>
 
-  <div class="tabs" role="tablist">
-    <button class="tab" id="tabRates" role="tab" aria-selected="true">Rates</button>
-    <button class="tab" id="tabFills" role="tab" aria-selected="false">Fill-ups</button>
-    <button class="tab" id="tabBal" role="tab" aria-selected="false">Balance</button>
+  <!-- ===== APP ===== -->
+  <div id="scrApp" class="hidden">
+    <div class="who"><span id="whoAmI"></span><button class="linkbtn" id="signOut">Sign out</button></div>
+
+    <div class="eyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
+    <h1>Fill up now, or hold for Monday?</h1>
+
+    <div class="totem">
+      <div class="cells">
+        <div class="cell"><div class="cell-label">Now &rarr; Sunday</div>
+          <div class="num dim" id="curNum">&mdash;</div><div class="cell-sub" id="curSub">not logged</div></div>
+        <div class="cell"><div class="cell-label">From Monday</div>
+          <div class="num dim" id="nextNum">&mdash;</div><div class="cell-sub" id="nextSub">awaiting email</div></div>
+      </div>
+      <div class="bar idle" id="bar"><span class="lamp"></span><span>
+        <div class="bar-text" id="barText">Log this week's rate to get started</div>
+        <div class="bar-sub" id="barSub"></div></span></div>
+    </div>
+
+    <div class="tabs" role="tablist">
+      <button class="tab" id="tabRates" role="tab" aria-selected="true">Rates</button>
+      <button class="tab" id="tabFills" role="tab" aria-selected="false">Fill-ups</button>
+      <button class="tab" id="tabBal" role="tab" aria-selected="false">Balance</button>
+    </div>
+
+    <div id="paneRates">
+      <button class="btn primary" id="addRate">Log Friday's rate</button>
+      <div class="form hidden" id="rateForm">
+        <div class="field"><label class="label" for="rateVal">Card cost ex VAT (&pound; per litre)</label>
+          <input class="input" id="rateVal" type="number" step="0.0001" inputmode="decimal" placeholder="1.4364">
+          <div class="hint" id="rateCalc"></div></div>
+        <div class="field"><label class="label" for="rateWeek">Week it takes effect</label>
+          <input class="input" id="rateWeek" type="date"><div class="hint" id="rateHint"></div></div>
+        <div class="warn hidden" id="rateErr"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn primary" id="rateSave">Save rate</button>
+          <button class="btn" id="rateCancel" style="flex:0 0 96px">Cancel</button></div>
+      </div>
+      <div id="trendBlock" class="hidden">
+        <div class="section"><div class="eyebrow" id="trendLabel">Trend</div><div class="eyebrow" id="trendRange"></div></div>
+        <div class="rule"></div>
+        <svg id="trend" viewBox="0 0 424 92" width="100%" height="92" role="img" aria-label="Rate trend"></svg>
+      </div>
+      <div class="section"><div class="eyebrow">Rate history</div><div class="eyebrow" id="rateCount">0 weeks</div></div>
+      <div class="rule"></div><div id="rateBlock"></div>
+    </div>
+
+    <div id="paneFills" class="hidden">
+      <div class="cardsel" id="cardSel"></div>
+      <button class="linkbtn" id="manageCards" style="margin-top:10px">Manage cards</button>
+      <div class="form hidden" id="cardForm">
+        <div class="field"><label class="label" for="cardNames">Card names, one per line</label>
+          <textarea class="input txt" id="cardNames" rows="4" style="resize:vertical"></textarea>
+          <div class="hint">Renaming a card here also renames it on every fill-up already logged.</div></div>
+        <div class="warn hidden" id="cardErr"></div>
+        <div class="row" style="margin-top:14px">
+          <button class="btn primary" id="cardSave">Save cards</button>
+          <button class="btn" id="cardCancel" style="flex:0 0 96px">Cancel</button></div>
+      </div>
+      <button class="btn primary" id="addFill">Log a fill-up</button>
+      <div class="form hidden" id="fillForm">
+        <div class="two">
+          <div class="field"><label class="label" for="fDate">Date</label><input class="input" id="fDate" type="date"></div>
+          <div class="field"><label class="label" for="fLitres">Litres</label><input class="input" id="fLitres" type="number" step="0.01" inputmode="decimal" placeholder="62.36"></div>
+        </div>
+        <div class="two">
+          <div class="field"><label class="label" for="fFore">Pump price &pound;/L</label><input class="input" id="fFore" type="number" step="0.0001" inputmode="decimal" placeholder="1.8990"></div>
+          <div class="field"><label class="label" for="fCard">Card</label><select class="input" id="fCard"></select></div>
+        </div>
+        <div class="field"><label class="label" for="fLoc">Location</label><input class="input txt" id="fLoc" type="text" placeholder="Shell Towcester"></div>
+        <div class="hint" id="fCalc"></div>
+        <div class="warn hidden" id="fErr"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn primary" id="fSave">Save fill-up</button>
+          <button class="btn" id="fCancel" style="flex:0 0 96px">Cancel</button></div>
+      </div>
+      <div class="section"><div class="eyebrow">Fill-ups</div><div class="eyebrow" id="fillCount">0</div></div>
+      <div class="rule"></div><div id="fillBlock"></div>
+    </div>
+
+    <div id="paneBal" class="hidden">
+      <div class="panel">
+        <div class="eyebrow">Outstanding &middot; unpaid</div>
+        <div class="big owed" id="balOwed" style="margin-top:10px">&pound;0.00</div>
+        <div class="hint" id="balOwedSub" style="margin-top:8px"></div>
+        <div class="kv" style="margin-top:14px"><span>This week's payment <em style="font-style:normal;opacity:.7">(last Mon&ndash;Sun)</em></span><b id="balThisWk">&pound;0.00</b></div>
+        <div class="kv"><span>Next week's payment <em style="font-style:normal;opacity:.7">(this Mon&ndash;Sun)</em></span><b id="balNextWk">&pound;0.00</b></div>
+        <div class="kv"><span>Spent this month</span><b id="balThisMo">&pound;0.00</b></div>
+        <div class="kv"><span>Spent last month</span><b id="balLastMo">&pound;0.00</b></div>
+      </div>
+      <div class="panel">
+        <div class="eyebrow">Saved vs pump price</div>
+        <div class="big saved" id="balSaved" style="margin-top:10px">&pound;0.00</div>
+        <div class="hint" id="balSavedSub" style="margin-top:8px"></div>
+      </div>
+      <button class="btn" id="addCharge">Add a service charge</button>
+      <div class="form hidden" id="chargeForm">
+        <div class="two">
+          <div class="field"><label class="label" for="cDate">Date</label><input class="input" id="cDate" type="date"></div>
+          <div class="field"><label class="label" for="cAmt">Amount &pound;</label><input class="input" id="cAmt" type="number" step="0.01" inputmode="decimal" placeholder="22.00"></div>
+        </div>
+        <div class="field"><label class="label" for="cNote">Note</label><input class="input txt" id="cNote" type="text" placeholder="Weekly service charge"></div>
+        <div class="warn hidden" id="cErr"></div>
+        <div class="row" style="margin-top:16px">
+          <button class="btn primary" id="cSave">Save charge</button>
+          <button class="btn" id="cCancel" style="flex:0 0 96px">Cancel</button></div>
+      </div>
+      <div class="section"><div class="eyebrow">Service charges</div><div class="eyebrow" id="chargeCount">0</div></div>
+      <div class="rule"></div><div id="chargeBlock"></div>
+      <div class="settings"><span>VAT rate</span>
+        <span class="row"><input class="input" id="vatInput" type="number" step="1" inputmode="decimal" style="width:70px;padding:7px 10px;font-size:14px"><button class="linkbtn" id="vatSave">%</button></span>
+      </div>
+      <div class="backup">
+        <button class="linkbtn" id="exportBtn" style="padding:0">Export my data</button>
+        <button class="linkbtn" id="importBtn" style="padding:0">Import a backup</button>
+        <input type="file" id="importFile" accept="application/json" class="hidden">
+      </div>
+      <div class="legal">
+        <b>Your data.</b> Only you can see it. Export it any time above.<br><br>
+        <button class="linkbtn danger" id="deleteAcct" style="padding:0">Delete my account and all my data</button>
+      </div>
+    </div>
   </div>
 
-  <!-- ===== RATES ===== -->
-  <div id="paneRates">
-    <button class="btn primary" id="addRate">Log Friday's rate</button>
-    <div class="form hidden" id="rateForm">
-      <div class="field">
-        <label class="label" for="rateVal">Card cost ex VAT (&pound; per litre)</label>
-        <input class="input" id="rateVal" type="number" step="0.0001" inputmode="decimal" placeholder="1.4364">
-        <div class="hint" id="rateCalc"></div>
-      </div>
-      <div class="field">
-        <label class="label" for="rateWeek">Week it takes effect</label>
-        <input class="input" id="rateWeek" type="date">
-        <div class="hint" id="rateHint"></div>
-      </div>
-      <div class="warn hidden" id="rateErr"></div>
-      <div class="row" style="margin-top:16px">
-        <button class="btn primary" id="rateSave">Save rate</button>
-        <button class="btn" id="rateCancel" style="flex:0 0 96px">Cancel</button>
-      </div>
-    </div>
-
-    <div id="trendBlock" class="hidden">
-      <div class="section"><div class="eyebrow" id="trendLabel">Trend</div><div class="eyebrow" id="trendRange"></div></div>
-      <div class="rule"></div>
-      <svg id="trend" viewBox="0 0 424 92" width="100%" height="92" role="img" aria-label="Rate trend"></svg>
-    </div>
-
-    <div class="section"><div class="eyebrow">Rate history</div><div class="eyebrow" id="rateCount">0 weeks</div></div>
-    <div class="rule"></div>
-    <div id="rateBlock"></div>
-  </div>
-
-  <!-- ===== FILLS ===== -->
-  <div id="paneFills" class="hidden">
-    <div class="cardsel" id="cardSel"></div>
-    <button class="btn primary" id="addFill">Log a fill-up</button>
-    <div class="form hidden" id="fillForm">
-      <div class="two">
-        <div class="field"><label class="label" for="fDate">Date</label><input class="input" id="fDate" type="date"></div>
-        <div class="field"><label class="label" for="fLitres">Litres</label><input class="input" id="fLitres" type="number" step="0.01" inputmode="decimal" placeholder="62.36"></div>
-      </div>
-      <div class="two">
-        <div class="field"><label class="label" for="fFore">Pump price &pound;/L</label><input class="input" id="fFore" type="number" step="0.0001" inputmode="decimal" placeholder="1.8990"></div>
-        <div class="field"><label class="label" for="fCard">Card</label><select class="input" id="fCard"></select></div>
-      </div>
-      <div class="field"><label class="label" for="fLoc">Location</label><input class="input txt" id="fLoc" type="text" placeholder="Shell Towcester"></div>
-      <div class="hint" id="fCalc"></div>
-      <div class="warn hidden" id="fErr"></div>
-      <div class="row" style="margin-top:16px">
-        <button class="btn primary" id="fSave">Save fill-up</button>
-        <button class="btn" id="fCancel" style="flex:0 0 96px">Cancel</button>
-      </div>
-    </div>
-    <div class="section"><div class="eyebrow">Fill-ups</div><div class="eyebrow" id="fillCount">0</div></div>
-    <div class="rule"></div>
-    <div id="fillBlock"></div>
-  </div>
-
-  <!-- ===== BALANCE ===== -->
-  <div id="paneBal" class="hidden">
-    <div class="panel">
-      <div class="eyebrow">Outstanding &middot; unpaid</div>
-      <div class="big owed" id="balOwed" style="margin-top:10px">&pound;0.00</div>
-      <div class="hint" id="balOwedSub" style="margin-top:8px"></div>
-      <div class="kv" style="margin-top:14px"><span>This week's payment <em style="font-style:normal;opacity:.7">(last Mon&ndash;Sun)</em></span><b id="balThisWk">&pound;0.00</b></div>
-      <div class="kv"><span>Next week's payment <em style="font-style:normal;opacity:.7">(this Mon&ndash;Sun)</em></span><b id="balNextWk">&pound;0.00</b></div>
-      <div class="kv"><span>Spent this month</span><b id="balThisMo">&pound;0.00</b></div>
-      <div class="kv"><span>Spent last month</span><b id="balLastMo">&pound;0.00</b></div>
-    </div>
-
-    <div class="panel">
-      <div class="eyebrow">Saved vs pump price</div>
-      <div class="big saved" id="balSaved" style="margin-top:10px">&pound;0.00</div>
-      <div class="hint" id="balSavedSub" style="margin-top:8px"></div>
-    </div>
-
-    <button class="btn" id="addCharge">Add a service charge</button>
-    <div class="form hidden" id="chargeForm">
-      <div class="two">
-        <div class="field"><label class="label" for="cDate">Date</label><input class="input" id="cDate" type="date"></div>
-        <div class="field"><label class="label" for="cAmt">Amount &pound;</label><input class="input" id="cAmt" type="number" step="0.01" inputmode="decimal" placeholder="22.00"></div>
-      </div>
-      <div class="field"><label class="label" for="cNote">Note</label><input class="input txt" id="cNote" type="text" placeholder="Weekly service charge"></div>
-      <div class="warn hidden" id="cErr"></div>
-      <div class="row" style="margin-top:16px">
-        <button class="btn primary" id="cSave">Save charge</button>
-        <button class="btn" id="cCancel" style="flex:0 0 96px">Cancel</button>
-      </div>
-    </div>
-    <div class="section"><div class="eyebrow">Service charges</div><div class="eyebrow" id="chargeCount">0</div></div>
-    <div class="rule"></div>
-    <div id="chargeBlock"></div>
-
-    <div class="settings"><span>VAT rate</span>
-      <span class="row"><input class="input" id="vatInput" type="number" step="1" inputmode="decimal" style="width:70px;padding:7px 10px;font-size:14px"><button class="linkbtn" id="vatSave">%</button></span>
-    </div>
-  </div>
-
-  <div class="backup">
-    <button class="linkbtn" id="exportBtn" style="padding:0">Save a backup</button>
-    <button class="linkbtn" id="importBtn" style="padding:0">Restore from backup</button>
-    <input type="file" id="importFile" accept="application/json" class="hidden">
-  </div>
+  <div id="scrLoad" class="spinner">Loading&hellip;</div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+/* ============================================================
+   PASTE YOUR TWO SUPABASE VALUES HERE
+   Supabase dashboard -> Settings -> API
+   ============================================================ */
+var SUPABASE_URL      = "PASTE_YOUR_PROJECT_URL";
+var SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_KEY";
+/* ========================================================== */
+
 (function(){
 "use strict";
-var DAY=86400000, KEY="fuelcard.v2";
-var state={vat:0.20,cards:["Mine","Card 2"],rates:[],fills:[],charges:[]};
-var view="all";
-
-/* dates */
-function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
-function iso(d){var p=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
-function fromIso(s){var a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2]);}
-function shortDate(s){return fromIso(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short"});}
-function money(n){return (n<0?"-\u00A3":"\u00A3")+Math.abs(n).toFixed(2);}
-function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
+var DAY=86400000;
+var sb=null, user=null, busy=false;
+var state={vat:0.20,cards:["Mine"],rates:[],fills:[],charges:[]};
+var view="all", mode="signin";
 var $=function(id){return document.getElementById(id)};
 
-/* storage */
-function load(){try{var raw=localStorage.getItem(KEY);if(!raw)return;var s=JSON.parse(raw);
-  if(Array.isArray(s.rates))state.rates=s.rates;
-  if(Array.isArray(s.fills))state.fills=s.fills;
-  if(Array.isArray(s.charges))state.charges=s.charges;
-  if(Array.isArray(s.cards)&&s.cards.length)state.cards=s.cards;
-  if(typeof s.vat==="number"&&s.vat>=0)state.vat=s.vat;}catch(e){}}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){return false}}
+/* ---------- helpers ---------- */
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+function iso(d){var p=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function fromIso(s){var a=String(s).slice(0,10).split("-").map(Number);return new Date(a[0],a[1]-1,a[2]);}
+function shortDate(s){return fromIso(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short"});}
+function money(n){return(n<0?"-\u00A3":"\u00A3")+Math.abs(n).toFixed(2);}
+function show(id){["scrSetup","scrAuth","scrApp","scrLoad"].forEach(function(s){$(s).classList.toggle("hidden",s!==id)});}
+function msg(el,text,cls){el.textContent=text;el.className=cls+(text?"":" hidden");}
 
-/* derived */
-function rateFor(dateIso){var wk=iso(mondayOf(fromIso(dateIso)));
+/* ---------- boot ---------- */
+function boot(){
+  if(SUPABASE_URL.indexOf("PASTE")===0||SUPABASE_ANON_KEY.indexOf("PASTE")===0){show("scrSetup");return;}
+  sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+  sb.auth.getSession().then(function(r){
+    if(r.data&&r.data.session){user=r.data.session.user;afterLogin();}
+    else{show("scrAuth");}
+  });
+  sb.auth.onAuthStateChange(function(ev,session){
+    if(ev==="SIGNED_OUT"){user=null;show("scrAuth");}
+  });
+}
+function afterLogin(){
+  show("scrLoad");
+  $("whoAmI").textContent=user.email;
+  loadAll().then(function(){show("scrApp");render();})
+  .catch(function(e){show("scrAuth");msg($("authErr"),"Couldn't load your data: "+e.message,"warn");});
+}
+
+/* ---------- auth ---------- */
+function setMode(m){
+  mode=m;
+  $("authTitle").textContent=m==="signin"?"Sign in":"Create an account";
+  $("authGo").textContent=m==="signin"?"Sign in":"Create account";
+  $("authSwap").textContent=m==="signin"?"Create an account instead":"I already have an account";
+  $("pw").setAttribute("autocomplete",m==="signin"?"current-password":"new-password");
+  msg($("authErr"),"","warn");msg($("authOk"),"","ok");
+}
+function doAuth(){
+  var email=$("email").value.trim(), pw=$("pw").value;
+  msg($("authErr"),"","warn");msg($("authOk"),"","ok");
+  if(!email||email.indexOf("@")<1){msg($("authErr"),"Enter your email address.","warn");return;}
+  if(pw.length<8){msg($("authErr"),"Passwords need at least 8 characters.","warn");return;}
+  $("authGo").disabled=true;
+  var p=mode==="signin"?sb.auth.signInWithPassword({email:email,password:pw})
+                       :sb.auth.signUp({email:email,password:pw});
+  p.then(function(r){
+    $("authGo").disabled=false;
+    if(r.error){msg($("authErr"),r.error.message,"warn");return;}
+    if(mode==="signup"&&(!r.data.session)){
+      msg($("authOk"),"Check your email and click the confirmation link, then sign in.","ok");
+      setMode("signin");return;
+    }
+    user=r.data.user;afterLogin();
+  }).catch(function(e){$("authGo").disabled=false;msg($("authErr"),e.message,"warn");});
+}
+function doReset(){
+  var email=$("email").value.trim();
+  if(!email){msg($("authErr"),"Enter your email address first.","warn");return;}
+  sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href}).then(function(){
+    msg($("authOk"),"If that address has an account, a reset link is on its way.","ok");
+  });
+}
+
+/* ---------- data layer ---------- */
+function loadAll(){
+  return Promise.all([
+    sb.from("settings").select("vat,cards").eq("user_id",user.id).maybeSingle(),
+    sb.from("rates").select("id,week_start,ex_vat").order("week_start",{ascending:false}),
+    sb.from("fills").select("*").order("fill_date",{ascending:false}),
+    sb.from("charges").select("*")
+  ]).then(function(res){
+    res.forEach(function(r){if(r.error)throw r.error;});
+    var s=res[0].data;
+    if(s){state.vat=Number(s.vat);state.cards=(Array.isArray(s.cards)&&s.cards.length)?s.cards:["Mine"];}
+    else{return sb.from("settings").insert({user_id:user.id}).then(function(){});}
+  }).then(function(){
+    return Promise.all([
+      sb.from("rates").select("id,week_start,ex_vat"),
+      sb.from("fills").select("*"),
+      sb.from("charges").select("*")
+    ]);
+  }).then(function(res){
+    res.forEach(function(r){if(r.error)throw r.error;});
+    state.rates=res[0].data.map(function(r){return{id:r.id,weekStart:String(r.week_start).slice(0,10),exVat:Number(r.ex_vat)}});
+    state.fills=res[1].data.map(function(f){return{id:f.id,card:f.card,date:String(f.fill_date).slice(0,10),
+      litres:Number(f.litres),forecourt:f.forecourt===null?null:Number(f.forecourt),
+      exVat:f.ex_vat_override===null?null:Number(f.ex_vat_override),location:f.location||"",paid:!!f.paid}});
+    state.charges=res[2].data.map(function(c){return{id:c.id,card:c.card,
+      date:c.charge_date?String(c.charge_date).slice(0,10):null,amount:Number(c.amount),note:c.note||"",paid:!!c.paid}});
+  });
+}
+function guard(p,onOk){
+  if(busy)return;busy=true;
+  p.then(function(r){busy=false;if(r&&r.error)throw r.error;if(onOk)onOk(r);})
+   .catch(function(e){busy=false;alert("Couldn't save: "+e.message);});
+}
+function saveSettings(){return sb.from("settings").upsert({user_id:user.id,vat:state.vat,cards:state.cards});}
+
+/* ---------- derived ---------- */
+function rateFor(d){var wk=iso(mondayOf(fromIso(d)));
   var m=state.rates.filter(function(r){return r.weekStart===wk})[0];return m?m.exVat:null;}
 function incVat(ex){return ex*(1+state.vat);}
-function fillCost(f){var ex=(typeof f.exVat==="number")?f.exVat:rateFor(f.date);
-  if(ex===null)return null;return f.litres*incVat(ex);}
-function fillSaving(f){var c=fillCost(f);if(c===null||typeof f.forecourt!=="number")return null;
-  return f.litres*f.forecourt-c;}
+function fillCost(f){var ex=(typeof f.exVat==="number"&&f.exVat)?f.exVat:rateFor(f.date);
+  return ex===null?null:f.litres*incVat(ex);}
+function fillSaving(f){var c=fillCost(f);if(c===null||!f.forecourt)return null;return f.litres*f.forecourt-c;}
 function inView(x){return view==="all"||x.card===view;}
 function visibleFills(){return state.fills.filter(inView);}
 function sumBetween(a,b){var s=0;visibleFills().forEach(function(f){
   if(f.date>=a&&f.date<=b){var c=fillCost(f);if(c!==null)s+=c;}});return s;}
+function avgLitres(){var f=visibleFills().slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
+  if(f.length<2)return null;return f.reduce(function(a,x){return a+x.litres},0)/f.length;}
 
-/* ===== render ===== */
+/* ---------- render ---------- */
 function render(){renderTotem();renderRates();renderTrend();renderCardSel();renderFills();renderBalance();
   $("vatInput").value=Math.round(state.vat*100);}
 
@@ -270,32 +390,26 @@ function renderTotem(){
   var thisMon=mondayOf(today),nextMon=new Date(thisMon.getTime()+7*DAY);
   var cur=state.rates.filter(function(r){return r.weekStart===iso(thisMon)})[0];
   var nxt=state.rates.filter(function(r){return r.weekStart===iso(nextMon)})[0];
-
   $("curNum").textContent=cur?cur.exVat.toFixed(4):"\u2014";
   $("curNum").className="num"+(cur?"":" dim");
   $("curSub").textContent=cur?money(incVat(cur.exVat))+"/L inc VAT":"not logged";
-
   var days=Math.round((nextMon-tm)/DAY);
   $("nextNum").textContent=nxt?nxt.exVat.toFixed(4):"\u2014";
   $("nextNum").className="num"+(nxt?"":" dim");
   $("nextSub").textContent=nxt?(money(incVat(nxt.exVat))+"/L \u00b7 "+(days>0?"in "+days+"d":"live")):"awaiting email";
-
   var cls="idle",text="Log this week's rate to get started",sub="";
-  if(cur&&!nxt){text="No new rate in yet";
-    sub="Friday's email sets the rate for the week beginning "+shortDate(iso(nextMon))+".";}
+  if(cur&&!nxt){text="No new rate in yet";sub="Friday's email sets the rate for the week beginning "+shortDate(iso(nextMon))+".";}
   else if(cur&&nxt){
     var diff=+(incVat(nxt.exVat)-incVat(cur.exVat)).toFixed(5);
-    var swing=Math.abs(diff),litres=avgLitres()||60,saving=swing*litres;
+    var swing=Math.abs(diff),litres=avgLitres()||60;
     if(swing<0.0005){cls="flat";text="No real change";sub="Same rate either side of the weekend \u2014 fill whenever suits.";}
     else if(diff<0){cls="wait";text="Hold on \u2014 fill after Monday";
       sub="Dropping "+(swing*100).toFixed(2)+"p a litre inc VAT. Waiting saves about "+money(swing*litres)+" on a "+Math.round(litres)+"-litre fill.";}
     else{cls="fill";text="Fill up before Sunday night";
-      sub="Rising "+(swing*100).toFixed(2)+"p a litre inc VAT. Filling now saves about "+money(saving)+" on a "+Math.round(litres)+"-litre fill.";}
+      sub="Rising "+(swing*100).toFixed(2)+"p a litre inc VAT. Filling now saves about "+money(swing*litres)+" on a "+Math.round(litres)+"-litre fill.";}
   }
   $("bar").className="bar "+cls;$("barText").textContent=text;$("barSub").textContent=sub;
 }
-function avgLitres(){var f=visibleFills().slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
-  if(f.length<2)return null;return f.reduce(function(a,x){return a+x.litres},0)/f.length;}
 
 function renderRates(){
   var s=state.rates.slice().sort(function(a,b){return a.weekStart<b.weekStart?1:-1});
@@ -312,7 +426,9 @@ function renderRates(){
     dl.textContent=d===null?"\u2014":(d>0?"\u25b2 ":d<0?"\u25bc ":"= ")+(Math.abs(d)*100).toFixed(2)+"p";
     var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
     b.setAttribute("aria-label","Delete rate for week commencing "+shortDate(e.weekStart));
-    b.addEventListener("click",function(){state.rates=state.rates.filter(function(x){return x.weekStart!==e.weekStart});save();render();});
+    b.addEventListener("click",function(){
+      guard(sb.from("rates").delete().eq("id",e.id),function(){
+        state.rates=state.rates.filter(function(x){return x.id!==e.id});render();});});
     li.appendChild(w);li.appendChild(p);li.appendChild(dl);li.appendChild(b);ul.appendChild(li);
   });
   $("rateBlock").innerHTML="";$("rateBlock").appendChild(ul);
@@ -339,12 +455,9 @@ function renderCardSel(){
   if(state.cards.length<2){el.classList.add("hidden");return;}
   el.classList.remove("hidden");
   ["all"].concat(state.cards).forEach(function(c){
-    var b=document.createElement("button");
-    b.textContent=c==="all"?"All":c;
+    var b=document.createElement("button");b.textContent=c==="all"?"All":c;
     b.setAttribute("aria-pressed",view===c?"true":"false");
-    b.addEventListener("click",function(){view=c;render();});
-    el.appendChild(b);
-  });
+    b.addEventListener("click",function(){view=c;render();});el.appendChild(b);});
 }
 
 function renderFills(){
@@ -352,7 +465,7 @@ function renderFills(){
   $("fillCount").textContent=s.length+" logged";
   if(!s.length){$("fillBlock").innerHTML='<div class="empty">No fill-ups yet. Log the litres and pump price \u2014 the cost and your saving come from that week\'s rate.</div>';return;}
   var ul=document.createElement("ul");ul.className="hist";
-  s.slice(0,60).forEach(function(f){
+  s.slice(0,80).forEach(function(f){
     var cost=fillCost(f),sav=fillSaving(f);
     var li=document.createElement("li");
     var m=document.createElement("div");m.className="fmain";
@@ -363,83 +476,84 @@ function renderFills(){
     if(state.cards.length>1&&view==="all")bits.push(f.card);
     l2.textContent=bits.join(" \u00b7 ");
     m.appendChild(l1);m.appendChild(l2);
-    var sv=document.createElement("span");sv.className="fsave";
-    sv.textContent=sav===null?"":"+"+money(sav);
-    var pd=document.createElement("button");pd.className="chip "+(f.paid?"on":"off");
-    pd.textContent=f.paid?"paid":"due";
-    pd.addEventListener("click",function(){f.paid=!f.paid;save();render();});
+    var sv=document.createElement("span");sv.className="fsave";sv.textContent=sav===null?"":"+"+money(sav);
+    var pd=document.createElement("button");pd.className="chip "+(f.paid?"on":"off");pd.textContent=f.paid?"paid":"due";
+    pd.addEventListener("click",function(){
+      guard(sb.from("fills").update({paid:!f.paid}).eq("id",f.id),function(){f.paid=!f.paid;render();});});
     var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
     b.setAttribute("aria-label","Delete fill-up on "+shortDate(f.date));
-    b.addEventListener("click",function(){state.fills=state.fills.filter(function(x){return x.id!==f.id});save();render();});
+    b.addEventListener("click",function(){
+      guard(sb.from("fills").delete().eq("id",f.id),function(){
+        state.fills=state.fills.filter(function(x){return x.id!==f.id});render();});});
     li.appendChild(m);li.appendChild(sv);li.appendChild(pd);li.appendChild(b);ul.appendChild(li);
   });
   $("fillBlock").innerHTML="";$("fillBlock").appendChild(ul);
 }
 
 function renderBalance(){
-  var now=new Date(),tm=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var now=new Date();
   var thisMon=mondayOf(now),lastMon=new Date(thisMon.getTime()-7*DAY),lastSun=new Date(thisMon.getTime()-DAY);
   var thisSun=new Date(thisMon.getTime()+6*DAY);
-
   var owed=0,unpriced=0;
   visibleFills().forEach(function(f){if(f.paid)return;var c=fillCost(f);if(c===null)unpriced++;else owed+=c;});
   state.charges.filter(inView).forEach(function(c){if(!c.paid)owed+=c.amount;});
   $("balOwed").textContent=money(owed);
   $("balOwedSub").textContent=unpriced?unpriced+" unpaid fill-up"+(unpriced===1?"":"s")+" have no rate logged and aren't counted.":"Everything with a rate logged is counted.";
-
   $("balThisWk").textContent=money(sumBetween(iso(lastMon),iso(lastSun)));
   $("balNextWk").textContent=money(sumBetween(iso(thisMon),iso(thisSun)));
   $("balThisMo").textContent=money(sumBetween(iso(new Date(now.getFullYear(),now.getMonth(),1)),iso(new Date(now.getFullYear(),now.getMonth()+1,0))));
   $("balLastMo").textContent=money(sumBetween(iso(new Date(now.getFullYear(),now.getMonth()-1,1)),iso(new Date(now.getFullYear(),now.getMonth(),0))));
-
   var gross=0,n=0;
   visibleFills().forEach(function(f){var s=fillSaving(f);if(s!==null){gross+=s;n++;}});
   var chg=state.charges.filter(inView).reduce(function(a,c){return a+c.amount},0);
   $("balSaved").textContent=money(gross-chg);
   $("balSavedSub").textContent=n?("Across "+n+" fill-up"+(n===1?"":"s")+", after "+money(chg)+" of service charges."):"Log a pump price with each fill to track this.";
-
   var cs=state.charges.filter(inView).slice().sort(function(a,b){return(a.date||"")<(b.date||"")?1:-1});
   $("chargeCount").textContent=cs.length;
-  if(!cs.length){$("chargeBlock").innerHTML='<div class="empty">No service charges logged.</div>';}
-  else{
-    var ul=document.createElement("ul");ul.className="hist";
-    cs.forEach(function(c){
-      var li=document.createElement("li");
-      var m=document.createElement("div");m.className="fmain";
-      var l1=document.createElement("div");l1.className="f1";l1.textContent=money(c.amount);
-      var l2=document.createElement("div");l2.className="f2";
-      l2.textContent=[c.date?shortDate(c.date):"no date",c.note||"service charge"].join(" \u00b7 ");
-      m.appendChild(l1);m.appendChild(l2);
-      var pd=document.createElement("button");pd.className="chip "+(c.paid?"on":"off");pd.textContent=c.paid?"paid":"due";
-      pd.addEventListener("click",function(){c.paid=!c.paid;save();render();});
-      var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
-      b.setAttribute("aria-label","Delete service charge");
-      b.addEventListener("click",function(){state.charges=state.charges.filter(function(x){return x.id!==c.id});save();render();});
-      li.appendChild(m);li.appendChild(pd);li.appendChild(b);ul.appendChild(li);
-    });
-    $("chargeBlock").innerHTML="";$("chargeBlock").appendChild(ul);
-  }
+  if(!cs.length){$("chargeBlock").innerHTML='<div class="empty">No service charges logged.</div>';return;}
+  var ul=document.createElement("ul");ul.className="hist";
+  cs.forEach(function(c){
+    var li=document.createElement("li");
+    var m=document.createElement("div");m.className="fmain";
+    var l1=document.createElement("div");l1.className="f1";l1.textContent=money(c.amount);
+    var l2=document.createElement("div");l2.className="f2";
+    l2.textContent=[c.date?shortDate(c.date):"no date",c.note||"service charge"].join(" \u00b7 ");
+    m.appendChild(l1);m.appendChild(l2);
+    var pd=document.createElement("button");pd.className="chip "+(c.paid?"on":"off");pd.textContent=c.paid?"paid":"due";
+    pd.addEventListener("click",function(){
+      guard(sb.from("charges").update({paid:!c.paid}).eq("id",c.id),function(){c.paid=!c.paid;render();});});
+    var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
+    b.setAttribute("aria-label","Delete service charge");
+    b.addEventListener("click",function(){
+      guard(sb.from("charges").delete().eq("id",c.id),function(){
+        state.charges=state.charges.filter(function(x){return x.id!==c.id});render();});});
+    li.appendChild(m);li.appendChild(pd);li.appendChild(b);ul.appendChild(li);
+  });
+  $("chargeBlock").innerHTML="";$("chargeBlock").appendChild(ul);
 }
 
-/* ===== forms ===== */
+/* ---------- forms ---------- */
 function openRate(){var tm=mondayOf(new Date()),nm=new Date(tm.getTime()+7*DAY);
   $("rateWeek").value=iso(state.rates.length===0?tm:nm);rateHint();$("rateVal").value="";
-  $("rateErr").classList.add("hidden");$("rateCalc").textContent="";
+  msg($("rateErr"),"","warn");$("rateCalc").textContent="";
   $("rateForm").classList.remove("hidden");$("addRate").classList.add("hidden");$("rateVal").focus();}
 function rateHint(){var v=$("rateWeek").value;
   $("rateHint").textContent=v?"Snaps to the Monday. Runs "+shortDate(v)+" to the Sunday.":"";}
 function rateCalc(){var v=parseFloat($("rateVal").value);
   $("rateCalc").textContent=isNaN(v)||v<=0?"":"= "+money(incVat(v))+" a litre inc VAT at "+Math.round(state.vat*100)+"%.";}
-function saveRate(){var v=parseFloat($("rateVal").value),err="";
+function saveRate(){
+  var v=parseFloat($("rateVal").value),err="";
   if(isNaN(v)||v<=0)err="Enter the ex-VAT rate in pounds, like 1.4364";
   else if(v>5)err="That looks like pence. Enter pounds per litre, like 1.4364";
   else if(!$("rateWeek").value)err="Pick the week this rate starts.";
-  if(err){$("rateErr").textContent=err;$("rateErr").classList.remove("hidden");return;}
+  if(err){msg($("rateErr"),err,"warn");return;}
   var wk=iso(mondayOf(fromIso($("rateWeek").value)));
-  state.rates=state.rates.filter(function(r){return r.weekStart!==wk});
-  state.rates.push({weekStart:wk,exVat:+v.toFixed(4)});
-  if(!save()){$("rateErr").textContent="That didn't save \u2014 your browser is blocking storage.";$("rateErr").classList.remove("hidden");return;}
-  $("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden");render();}
+  guard(sb.from("rates").upsert({user_id:user.id,week_start:wk,ex_vat:+v.toFixed(4)},{onConflict:"user_id,week_start"}).select(),
+    function(r){
+      state.rates=state.rates.filter(function(x){return x.weekStart!==wk});
+      state.rates.push({id:r.data[0].id,weekStart:wk,exVat:+v.toFixed(4)});
+      $("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden");render();});
+}
 
 function openFill(){
   var last=state.fills.slice().sort(function(a,b){return a.date<b.date?1:-1})[0];
@@ -449,7 +563,7 @@ function openFill(){
   var sel=$("fCard");sel.innerHTML="";
   state.cards.forEach(function(c){var o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});
   if(view!=="all")sel.value=view;
-  $("fErr").classList.add("hidden");fillCalc();
+  msg($("fErr"),"","warn");fillCalc();
   $("fillForm").classList.remove("hidden");$("addFill").classList.add("hidden");$("fLitres").focus();}
 function fillCalc(){
   var l=parseFloat($("fLitres").value),d=$("fDate").value,fo=parseFloat($("fFore").value);
@@ -465,40 +579,94 @@ function saveFill(){
   else if(isNaN(l)||l<=0)err="Enter how many litres went in.";
   else if(l>2000)err="That looks off for litres. Check the figure.";
   else if($("fFore").value.trim()!==""&&(isNaN(fo)||fo<=0||fo>10))err="Pump price should be pounds per litre, like 1.8990";
-  if(err){$("fErr").textContent=err;$("fErr").classList.remove("hidden");return;}
-  var f={id:String(Date.now())+Math.random().toString(36).slice(2,7),card:$("fCard").value,
-    date:d,litres:+l.toFixed(2),location:$("fLoc").value.trim().slice(0,60),paid:false};
-  if(!isNaN(fo)&&fo>0)f.forecourt=+fo.toFixed(4);
-  state.fills.push(f);
-  if(!save()){$("fErr").textContent="That didn't save \u2014 your browser is blocking storage.";$("fErr").classList.remove("hidden");return;}
-  $("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");render();}
+  if(err){msg($("fErr"),err,"warn");return;}
+  var rec={user_id:user.id,card:$("fCard").value,fill_date:d,litres:+l.toFixed(2),
+    location:$("fLoc").value.trim().slice(0,60),paid:false};
+  if(!isNaN(fo)&&fo>0)rec.forecourt=+fo.toFixed(4);
+  guard(sb.from("fills").insert(rec).select(),function(r){
+    var f=r.data[0];
+    state.fills.push({id:f.id,card:f.card,date:String(f.fill_date).slice(0,10),litres:Number(f.litres),
+      forecourt:f.forecourt===null?null:Number(f.forecourt),exVat:null,location:f.location||"",paid:false});
+    $("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");render();});
+}
 
 function openCharge(){$("cDate").value=iso(new Date());$("cAmt").value="";$("cNote").value="";
-  $("cErr").classList.add("hidden");$("chargeForm").classList.remove("hidden");$("addCharge").classList.add("hidden");$("cAmt").focus();}
-function saveCharge(){var a=parseFloat($("cAmt").value);
-  if(isNaN(a)||a===0){$("cErr").textContent="Enter the charge amount in pounds.";$("cErr").classList.remove("hidden");return;}
-  state.charges.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),
-    card:view==="all"?state.cards[0]:view,date:$("cDate").value||null,
-    amount:+Math.abs(a).toFixed(2),note:$("cNote").value.trim().slice(0,60),paid:false});
-  save();$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");render();}
+  msg($("cErr"),"","warn");$("chargeForm").classList.remove("hidden");$("addCharge").classList.add("hidden");$("cAmt").focus();}
+function saveCharge(){
+  var a=parseFloat($("cAmt").value);
+  if(isNaN(a)||a===0){msg($("cErr"),"Enter the charge amount in pounds.","warn");return;}
+  var rec={user_id:user.id,card:view==="all"?state.cards[0]:view,charge_date:$("cDate").value||null,
+    amount:+Math.abs(a).toFixed(2),note:$("cNote").value.trim().slice(0,60),paid:false};
+  guard(sb.from("charges").insert(rec).select(),function(r){
+    var c=r.data[0];
+    state.charges.push({id:c.id,card:c.card,date:c.charge_date?String(c.charge_date).slice(0,10):null,
+      amount:Number(c.amount),note:c.note||"",paid:false});
+    $("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");render();});
+}
 
-/* backup */
+function openCards(){$("cardNames").value=state.cards.join("\n");msg($("cardErr"),"","warn");
+  $("cardForm").classList.remove("hidden");}
+function saveCards(){
+  var names=$("cardNames").value.split("\n").map(function(s){return s.trim().slice(0,40)}).filter(Boolean);
+  if(!names.length){msg($("cardErr"),"Keep at least one card.","warn");return;}
+  var old=state.cards.slice();
+  state.cards=names;
+  // rename fills positionally where a card was renamed
+  var renames=[];
+  old.forEach(function(o,i){if(names[i]&&names[i]!==o)renames.push([o,names[i]]);});
+  var chain=saveSettings();
+  renames.forEach(function(pair){
+    chain=chain.then(function(){return sb.from("fills").update({card:pair[1]}).eq("card",pair[0]);})
+               .then(function(){return sb.from("charges").update({card:pair[1]}).eq("card",pair[0]);});
+  });
+  chain.then(function(){
+    renames.forEach(function(p){
+      state.fills.forEach(function(f){if(f.card===p[0])f.card=p[1]});
+      state.charges.forEach(function(c){if(c.card===p[0])c.card=p[1]});});
+    view="all";$("cardForm").classList.add("hidden");render();
+  }).catch(function(e){msg($("cardErr"),e.message,"warn");});
+}
+
+/* ---------- export / import / delete ---------- */
 function exportData(){
-  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var blob=new Blob([JSON.stringify({vat:state.vat,cards:state.cards,rates:state.rates,
+    fills:state.fills,charges:state.charges},null,2)],{type:"application/json"});
   var a=document.createElement("a");a.href=URL.createObjectURL(blob);
   a.download="fuel-card-backup-"+iso(new Date())+".json";a.click();URL.revokeObjectURL(a.href);}
-function importData(file){var r=new FileReader();
-  r.onload=function(){try{var s=JSON.parse(r.result);
-    if(!s||!Array.isArray(s.rates))throw new Error("bad");
-    state.rates=s.rates;state.fills=Array.isArray(s.fills)?s.fills:[];
-    state.charges=Array.isArray(s.charges)?s.charges:[];
-    if(Array.isArray(s.cards)&&s.cards.length)state.cards=s.cards;
-    if(typeof s.vat==="number")state.vat=s.vat;
-    save();view="all";render();
-  }catch(e){alert("That file isn't a fuel card backup. Pick the .json file this app saved.");}};
+
+function importData(file){
+  var r=new FileReader();
+  r.onload=function(){
+    var s;
+    try{s=JSON.parse(r.result);}catch(e){alert("That isn't a valid backup file.");return;}
+    if(!s||!Array.isArray(s.rates)){alert("That file isn't a fuel card backup.");return;}
+    if(!confirm("Add "+s.rates.length+" rates and "+(s.fills||[]).length+" fill-ups to your account? Existing data is kept."))return;
+    var cards=Array.isArray(s.cards)&&s.cards.length?s.cards:state.cards;
+    var rates=s.rates.map(function(x){return{user_id:user.id,week_start:x.weekStart,ex_vat:x.exVat}});
+    var fills=(s.fills||[]).map(function(x){return{user_id:user.id,card:x.card||cards[0],fill_date:x.date,
+      litres:x.litres,forecourt:x.forecourt||null,ex_vat_override:x.exVat||null,location:x.location||"",paid:!!x.paid}});
+    var chgs=(s.charges||[]).map(function(x){return{user_id:user.id,card:x.card||cards[0],
+      charge_date:x.date||null,amount:x.amount,note:x.note||"",paid:!!x.paid}});
+    state.cards=cards;
+    saveSettings()
+      .then(function(){return rates.length?sb.from("rates").upsert(rates,{onConflict:"user_id,week_start"}):null;})
+      .then(function(){return fills.length?sb.from("fills").insert(fills):null;})
+      .then(function(){return chgs.length?sb.from("charges").insert(chgs):null;})
+      .then(function(){return loadAll();})
+      .then(function(){view="all";render();alert("Imported.");})
+      .catch(function(e){alert("Import failed: "+e.message);});
+  };
   r.readAsText(file);}
 
-/* tabs */
+function deleteAccount(){
+  if(!confirm("This permanently deletes your account and every fill-up, rate and charge in it. This cannot be undone."))return;
+  if(!confirm("Last check \u2014 delete everything?"))return;
+  sb.rpc("delete_own_account").then(function(r){
+    if(r.error){alert("Couldn't delete: "+r.error.message);return;}
+    sb.auth.signOut().then(function(){location.reload();});
+  });}
+
+/* ---------- tabs ---------- */
 function showTab(w){
   $("tabRates").setAttribute("aria-selected",w==="rates");
   $("tabFills").setAttribute("aria-selected",w==="fills");
@@ -507,30 +675,42 @@ function showTab(w){
   $("paneFills").classList.toggle("hidden",w!=="fills");
   $("paneBal").classList.toggle("hidden",w!=="bal");}
 
-/* wiring */
+/* ---------- wiring ---------- */
+$("authGo").addEventListener("click",doAuth);
+$("authSwap").addEventListener("click",function(){setMode(mode==="signin"?"signup":"signin")});
+$("authReset").addEventListener("click",doReset);
+$("pw").addEventListener("keydown",function(e){if(e.key==="Enter")doAuth()});
+$("signOut").addEventListener("click",function(){sb.auth.signOut()});
 $("tabRates").addEventListener("click",function(){showTab("rates")});
 $("tabFills").addEventListener("click",function(){showTab("fills")});
 $("tabBal").addEventListener("click",function(){showTab("bal")});
 $("addRate").addEventListener("click",openRate);
-$("rateCancel").addEventListener("click",function(){$("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden");});
+$("rateCancel").addEventListener("click",function(){$("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden")});
 $("rateSave").addEventListener("click",saveRate);
 $("rateVal").addEventListener("input",rateCalc);
 $("rateVal").addEventListener("keydown",function(e){if(e.key==="Enter")saveRate()});
 $("rateWeek").addEventListener("change",function(){if($("rateWeek").value)$("rateWeek").value=iso(mondayOf(fromIso($("rateWeek").value)));rateHint();});
 $("addFill").addEventListener("click",openFill);
-$("fCancel").addEventListener("click",function(){$("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");});
+$("fCancel").addEventListener("click",function(){$("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden")});
 $("fSave").addEventListener("click",saveFill);
 ["fLitres","fFore","fDate"].forEach(function(id){$(id).addEventListener("input",fillCalc);$(id).addEventListener("change",fillCalc);});
+$("manageCards").addEventListener("click",openCards);
+$("cardCancel").addEventListener("click",function(){$("cardForm").classList.add("hidden")});
+$("cardSave").addEventListener("click",saveCards);
 $("addCharge").addEventListener("click",openCharge);
-$("cCancel").addEventListener("click",function(){$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");});
+$("cCancel").addEventListener("click",function(){$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden")});
 $("cSave").addEventListener("click",saveCharge);
-$("vatSave").addEventListener("click",function(){var v=parseFloat($("vatInput").value);
-  if(!isNaN(v)&&v>=0&&v<100){state.vat=v/100;save();render();}});
+$("vatSave").addEventListener("click",function(){
+  var v=parseFloat($("vatInput").value);
+  if(isNaN(v)||v<0||v>=100)return;
+  state.vat=v/100;guard(saveSettings(),function(){render();});});
 $("exportBtn").addEventListener("click",exportData);
 $("importBtn").addEventListener("click",function(){$("importFile").click()});
 $("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
+$("deleteAcct").addEventListener("click",deleteAccount);
 
-load();render();
+setMode("signin");
+boot();
 })();
 </script>
 </body>
