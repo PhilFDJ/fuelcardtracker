@@ -8,209 +8,212 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Fuel Card">
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C181C'/%3E%3Ctext x='90' y='118' font-family='monospace' font-size='74' font-weight='700' fill='%23F2B33D' text-anchor='middle'%3Ep%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' fill='%230C181C'/%3E%3Ctext x='90' y='118' font-family='monospace' font-size='70' font-weight='700' fill='%23F2B33D' text-anchor='middle'%3E%C2%A3L%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  :root {
-    --forecourt: #0C181C;
-    --slick: #14262C;
-    --edge: #233D45;
-    --ink: #E6F0F1;
-    --mute: #7D9AA2;
-    --amber: #F2B33D;
-    --go: #45D6A0;
-    --stop: #FF7A66;
-  }
-  * { box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    margin: 0;
-    background:
-      radial-gradient(120% 60% at 50% -10%, rgba(69,214,160,0.10), transparent 60%),
-      radial-gradient(90% 50% at 90% 0%, rgba(242,179,61,0.08), transparent 55%),
-      var(--forecourt);
-    background-attachment: fixed;
-    color: var(--ink);
-    font-family: 'IBM Plex Sans', ui-sans-serif, -apple-system, sans-serif;
-    padding: max(26px, env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));
-    -webkit-text-size-adjust: 100%;
-  }
-  .wrap { max-width: 460px; margin: 0 auto; }
-
-  .eyebrow {
-    font-family: 'Archivo', sans-serif;
-    font-size: 11px; font-weight: 700; letter-spacing: .22em;
-    text-transform: uppercase; color: var(--mute);
-  }
-  h1 {
-    font-family: 'Archivo', sans-serif;
-    font-size: 27px; font-weight: 800; letter-spacing: -.02em;
-    margin: 5px 0 22px; line-height: 1.1;
-  }
-
-  /* totem */
-  .totem {
-    border: 1px solid var(--edge); border-radius: 14px;
-    background: linear-gradient(180deg, var(--slick), #0F1F24);
-    overflow: hidden;
-  }
-  .cells { display: grid; grid-template-columns: 1fr 1fr; }
-  .cell { padding: 20px 16px 18px; text-align: center; }
-  .cell + .cell { border-left: 1px solid var(--edge); }
-  .cell-label {
-    font-family: 'Archivo', sans-serif; font-size: 10px; font-weight: 700;
-    letter-spacing: .18em; text-transform: uppercase; color: var(--mute); margin-bottom: 10px;
-  }
-  .num {
-    font-family: 'IBM Plex Mono', ui-monospace, monospace;
-    font-variant-numeric: tabular-nums; font-weight: 700;
-    font-size: 40px; line-height: 1; letter-spacing: -.03em;
-    color: var(--amber); text-shadow: 0 0 22px rgba(242,179,61,.34);
-  }
-  .num.dim { color: var(--mute); text-shadow: none; opacity: .75; }
-  .unit { font-size: 15px; font-weight: 600; margin-left: 2px; }
-  .cell-sub { font-size: 11px; color: var(--mute); margin-top: 8px; }
-
-  .bar { padding: 15px 16px; border-top: 1px solid var(--edge); display: flex; align-items: flex-start; gap: 12px; }
-  .lamp { width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto; margin-top: 5px; background: var(--edge); }
-  .bar-text { font-family: 'Archivo', sans-serif; font-weight: 800; font-size: 15px; }
-  .bar-sub { font-size: 12px; color: var(--mute); margin-top: 3px; line-height: 1.45; }
-  .bar.wait { background: rgba(69,214,160,.09); }
-  .bar.wait .lamp { background: var(--go); box-shadow: 0 0 12px var(--go); }
-  .bar.wait .bar-text { color: var(--go); }
-  .bar.fill { background: rgba(255,122,102,.09); }
-  .bar.fill .lamp { background: var(--stop); box-shadow: 0 0 12px var(--stop); }
-  .bar.fill .bar-text { color: var(--stop); }
-  .bar.flat .lamp { background: var(--mute); }
-  .bar.idle .bar-text { color: var(--mute); font-weight: 500; font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; }
-
-  /* controls */
-  button {
-    font-family: 'Archivo', sans-serif; cursor: pointer;
-    -webkit-tap-highlight-color: transparent;
-  }
-  .btn {
-    width: 100%; margin-top: 14px; padding: 15px; border-radius: 12px;
-    border: 1px solid var(--edge); background: var(--slick); color: var(--ink);
-    font-weight: 700; font-size: 14px; letter-spacing: .02em;
-    transition: background .15s, border-color .15s;
-  }
-  .btn:hover { background: #1A2F36; border-color: #2F535D; }
-  .btn.primary { background: var(--amber); color: #10201B; border-color: var(--amber); }
-  .btn.primary:hover { background: #FFC658; }
-  :focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
-
-  .form { margin-top: 14px; padding: 16px; border: 1px solid var(--edge); border-radius: 12px; background: var(--slick); }
-  .field { margin-bottom: 13px; }
-  .label {
-    display: block; font-size: 11px; font-weight: 600; color: var(--mute);
-    text-transform: uppercase; letter-spacing: .13em; margin-bottom: 7px;
-    font-family: 'Archivo', sans-serif;
-  }
-  .input {
-    width: 100%; padding: 13px 14px; border-radius: 10px;
-    border: 1px solid var(--edge); background: #0D1C21; color: var(--ink);
-    font-family: 'IBM Plex Mono', monospace; font-size: 17px;
-    font-variant-numeric: tabular-nums;
-  }
-  .hint { font-size: 11.5px; color: var(--mute); margin-top: 6px; line-height: 1.45; }
-  .row { display: flex; gap: 9px; }
-  .row .btn { margin-top: 0; }
-
-  .section { margin-top: 30px; display: flex; align-items: baseline; justify-content: space-between; }
-  .rule { height: 1px; background: var(--edge); margin: 10px 0 14px; }
-
-  ul.hist { list-style: none; padding: 0; margin: 0; }
-  ul.hist li { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid rgba(35,61,69,.6); }
-  .hist-week { font-size: 13px; color: var(--mute); width: 96px; flex: 0 0 auto; }
-  .hist-price { font-family: 'IBM Plex Mono', monospace; font-variant-numeric: tabular-nums; font-size: 16px; font-weight: 600; flex: 1; }
-  .delta { font-family: 'IBM Plex Mono', monospace; font-size: 12.5px; font-variant-numeric: tabular-nums; }
-  .delta.up { color: var(--stop); }
-  .delta.down { color: var(--go); }
-  .delta.same { color: var(--mute); }
-  .icon { background: none; border: none; color: var(--mute); font-size: 19px; padding: 4px 8px; line-height: 1; border-radius: 6px; }
-  .icon:hover { color: var(--stop); }
-
-  .empty { border: 1px dashed var(--edge); border-radius: 12px; padding: 22px 18px; text-align: center; color: var(--mute); font-size: 13.5px; line-height: 1.55; }
-  .settings { margin-top: 26px; display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--mute); }
-  .linkbtn { background: none; border: none; color: var(--amber); font-size: 13px; font-family: 'IBM Plex Sans', sans-serif; padding: 4px; border-radius: 6px; }
-  .warn { margin-top: 14px; padding: 11px 13px; border-radius: 10px; background: rgba(255,122,102,.1); border: 1px solid rgba(255,122,102,.3); color: var(--stop); font-size: 12.5px; }
-  .hidden { display: none !important; }
-  .backup { margin-top: 18px; display: flex; gap: 16px; font-size: 12.5px; }
-  @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  :root{--forecourt:#0C181C;--slick:#14262C;--edge:#233D45;--ink:#E6F0F1;--mute:#7D9AA2;--amber:#F2B33D;--go:#45D6A0;--stop:#FF7A66}
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;background:radial-gradient(120% 60% at 50% -10%,rgba(69,214,160,.10),transparent 60%),radial-gradient(90% 50% at 90% 0%,rgba(242,179,61,.08),transparent 55%),var(--forecourt);background-attachment:fixed;color:var(--ink);font-family:'IBM Plex Sans',ui-sans-serif,-apple-system,sans-serif;padding:max(26px,env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));-webkit-text-size-adjust:100%}
+  .wrap{max-width:460px;margin:0 auto}
+  .eyebrow{font-family:'Archivo',sans-serif;font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:var(--mute)}
+  h1{font-family:'Archivo',sans-serif;font-size:26px;font-weight:800;letter-spacing:-.02em;margin:5px 0 20px;line-height:1.1}
+  .totem{border:1px solid var(--edge);border-radius:14px;background:linear-gradient(180deg,var(--slick),#0F1F24);overflow:hidden}
+  .cells{display:grid;grid-template-columns:1fr 1fr}
+  .cell{padding:18px 14px 16px;text-align:center}
+  .cell+.cell{border-left:1px solid var(--edge)}
+  .cell-label{font-family:'Archivo',sans-serif;font-size:9.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);margin-bottom:9px}
+  .num{font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;font-weight:700;font-size:30px;line-height:1;letter-spacing:-.03em;color:var(--amber);text-shadow:0 0 22px rgba(242,179,61,.34)}
+  .num.dim{color:var(--mute);text-shadow:none;opacity:.75}
+  .cell-sub{font-size:10.5px;color:var(--mute);margin-top:7px;line-height:1.4}
+  .bar{padding:15px 16px;border-top:1px solid var(--edge);display:flex;align-items:flex-start;gap:12px}
+  .lamp{width:9px;height:9px;border-radius:50%;flex:0 0 auto;margin-top:5px;background:var(--edge)}
+  .bar-text{font-family:'Archivo',sans-serif;font-weight:800;font-size:15px}
+  .bar-sub{font-size:12px;color:var(--mute);margin-top:3px;line-height:1.45}
+  .bar.wait{background:rgba(69,214,160,.09)}.bar.wait .lamp{background:var(--go);box-shadow:0 0 12px var(--go)}.bar.wait .bar-text{color:var(--go)}
+  .bar.fill{background:rgba(255,122,102,.09)}.bar.fill .lamp{background:var(--stop);box-shadow:0 0 12px var(--stop)}.bar.fill .bar-text{color:var(--stop)}
+  .bar.flat .lamp{background:var(--mute)}
+  .bar.idle .bar-text{color:var(--mute);font-weight:500;font-size:13px;font-family:'IBM Plex Sans',sans-serif}
+  .tabs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;margin-top:18px;padding:4px;border:1px solid var(--edge);border-radius:12px;background:rgba(20,38,44,.6)}
+  .tab{padding:10px 4px;border:none;border-radius:9px;background:none;color:var(--mute);font-weight:700;font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+  .tab[aria-selected="true"]{background:var(--slick);color:var(--ink);box-shadow:inset 0 0 0 1px var(--edge)}
+  button{font-family:'Archivo',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .btn{width:100%;margin-top:14px;padding:15px;border-radius:12px;border:1px solid var(--edge);background:var(--slick);color:var(--ink);font-weight:700;font-size:14px;transition:background .15s,border-color .15s}
+  .btn:hover{background:#1A2F36;border-color:#2F535D}
+  .btn.primary{background:var(--amber);color:#10201B;border-color:var(--amber)}
+  .btn.primary:hover{background:#FFC658}
+  :focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+  .form{margin-top:14px;padding:16px;border:1px solid var(--edge);border-radius:12px;background:var(--slick)}
+  .field{margin-bottom:13px}
+  .label{display:block;font-size:11px;font-weight:600;color:var(--mute);text-transform:uppercase;letter-spacing:.13em;margin-bottom:7px;font-family:'Archivo',sans-serif}
+  .input{width:100%;padding:12px 13px;border-radius:10px;border:1px solid var(--edge);background:#0D1C21;color:var(--ink);font-family:'IBM Plex Mono',monospace;font-size:16px;font-variant-numeric:tabular-nums}
+  select.input,input.txt{font-family:'IBM Plex Sans',sans-serif;font-size:15px}
+  .hint{font-size:11.5px;color:var(--mute);margin-top:6px;line-height:1.45}
+  .row{display:flex;gap:9px}.row .btn{margin-top:0}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .section{margin-top:26px;display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+  .rule{height:1px;background:var(--edge);margin:10px 0 14px}
+  .panel{margin-top:16px;padding:18px 16px;border:1px solid var(--edge);border-radius:14px;background:linear-gradient(180deg,var(--slick),#0F1F24)}
+  .big{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:32px;font-weight:700;line-height:1;letter-spacing:-.02em}
+  .big.owed{color:var(--amber)}
+  .big.saved{color:var(--go)}
+  .kv{display:flex;justify-content:space-between;align-items:baseline;padding:9px 0;font-size:13px;color:var(--mute);border-top:1px solid var(--edge)}
+  .kv b{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;color:var(--ink)}
+  ul.hist{list-style:none;padding:0;margin:0}
+  ul.hist li{display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid rgba(35,61,69,.6)}
+  .hist-week{font-size:13px;color:var(--mute);width:92px;flex:0 0 auto}
+  .hist-price{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600;flex:1}
+  .delta{font-family:'IBM Plex Mono',monospace;font-size:12.5px;font-variant-numeric:tabular-nums}
+  .delta.up{color:var(--stop)}.delta.down{color:var(--go)}.delta.same{color:var(--mute)}
+  .icon{background:none;border:none;color:var(--mute);font-size:18px;padding:4px 7px;line-height:1;border-radius:6px}
+  .icon:hover{color:var(--stop)}
+  .chip{border:1px solid var(--edge);background:none;color:var(--mute);border-radius:99px;padding:4px 10px;font-size:11px;font-weight:700;letter-spacing:.06em}
+  .chip.on{border-color:var(--go);color:var(--go)}
+  .chip.off{border-color:var(--amber);color:var(--amber)}
+  .fmain{flex:1;min-width:0}
+  .f1{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600}
+  .f2{font-size:11px;color:var(--mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .fsave{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--go);flex:0 0 auto}
+  .empty{border:1px dashed var(--edge);border-radius:12px;padding:20px 18px;text-align:center;color:var(--mute);font-size:13.5px;line-height:1.55}
+  .settings{margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
+  .linkbtn{background:none;border:none;color:var(--amber);font-size:13px;font-family:'IBM Plex Sans',sans-serif;padding:4px;border-radius:6px}
+  .warn{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(255,122,102,.1);border:1px solid rgba(255,122,102,.3);color:var(--stop);font-size:12.5px;line-height:1.45}
+  .hidden{display:none!important}
+  .backup{margin-top:20px;display:flex;gap:16px;font-size:12.5px;flex-wrap:wrap}
+  .cardsel{display:flex;gap:6px;margin-top:14px}
+  .cardsel button{flex:1;padding:9px 6px;border-radius:9px;border:1px solid var(--edge);background:none;color:var(--mute);font-size:12px;font-weight:700}
+  .cardsel button[aria-pressed="true"]{background:var(--slick);color:var(--ink)}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="eyebrow">Fuel card · pence per litre</div>
+  <div class="eyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
   <h1>Fill up now, or hold for Monday?</h1>
 
   <div class="totem">
     <div class="cells">
       <div class="cell">
         <div class="cell-label">Now &rarr; Sunday</div>
-        <div class="num dim" id="curNum">&ndash;&ndash;.&ndash;<span class="unit">p</span></div>
+        <div class="num dim" id="curNum">&mdash;</div>
         <div class="cell-sub" id="curSub">not logged</div>
       </div>
       <div class="cell">
         <div class="cell-label">From Monday</div>
-        <div class="num dim" id="nextNum">&ndash;&ndash;.&ndash;<span class="unit">p</span></div>
+        <div class="num dim" id="nextNum">&mdash;</div>
         <div class="cell-sub" id="nextSub">awaiting email</div>
       </div>
     </div>
-    <div class="bar idle" id="bar">
-      <span class="lamp"></span>
-      <span>
-        <div class="bar-text" id="barText">Log this week's rate to get started</div>
-        <div class="bar-sub" id="barSub"></div>
-      </span>
+    <div class="bar idle" id="bar"><span class="lamp"></span><span>
+      <div class="bar-text" id="barText">Log this week's rate to get started</div>
+      <div class="bar-sub" id="barSub"></div></span>
     </div>
   </div>
 
-  <button class="btn primary" id="addBtn">Log a price</button>
-
-  <div class="form hidden" id="form">
-    <div class="field">
-      <label class="label" for="price">Price in pence per litre</label>
-      <input class="input" id="price" type="number" step="0.1" inputmode="decimal" placeholder="132.4">
-    </div>
-    <div class="field">
-      <label class="label" for="week">Week it takes effect</label>
-      <input class="input" id="week" type="date">
-      <div class="hint" id="weekHint"></div>
-    </div>
-    <div class="warn hidden" id="formErr"></div>
-    <div class="row" style="margin-top:16px">
-      <button class="btn primary" id="saveBtn">Save price</button>
-      <button class="btn" id="cancelBtn" style="flex:0 0 100px">Cancel</button>
-    </div>
+  <div class="tabs" role="tablist">
+    <button class="tab" id="tabRates" role="tab" aria-selected="true">Rates</button>
+    <button class="tab" id="tabFills" role="tab" aria-selected="false">Fill-ups</button>
+    <button class="tab" id="tabBal" role="tab" aria-selected="false">Balance</button>
   </div>
 
-  <div id="trendBlock" class="hidden">
-    <div class="section">
-      <div class="eyebrow" id="trendLabel">Trend</div>
-      <div class="eyebrow" id="trendRange"></div>
+  <!-- ===== RATES ===== -->
+  <div id="paneRates">
+    <button class="btn primary" id="addRate">Log Friday's rate</button>
+    <div class="form hidden" id="rateForm">
+      <div class="field">
+        <label class="label" for="rateVal">Card cost ex VAT (&pound; per litre)</label>
+        <input class="input" id="rateVal" type="number" step="0.0001" inputmode="decimal" placeholder="1.4364">
+        <div class="hint" id="rateCalc"></div>
+      </div>
+      <div class="field">
+        <label class="label" for="rateWeek">Week it takes effect</label>
+        <input class="input" id="rateWeek" type="date">
+        <div class="hint" id="rateHint"></div>
+      </div>
+      <div class="warn hidden" id="rateErr"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="rateSave">Save rate</button>
+        <button class="btn" id="rateCancel" style="flex:0 0 96px">Cancel</button>
+      </div>
     </div>
+
+    <div id="trendBlock" class="hidden">
+      <div class="section"><div class="eyebrow" id="trendLabel">Trend</div><div class="eyebrow" id="trendRange"></div></div>
+      <div class="rule"></div>
+      <svg id="trend" viewBox="0 0 424 92" width="100%" height="92" role="img" aria-label="Rate trend"></svg>
+    </div>
+
+    <div class="section"><div class="eyebrow">Rate history</div><div class="eyebrow" id="rateCount">0 weeks</div></div>
     <div class="rule"></div>
-    <svg id="trend" viewBox="0 0 424 92" width="100%" height="92" role="img" aria-label="Price trend"></svg>
+    <div id="rateBlock"></div>
   </div>
 
-  <div class="section">
-    <div class="eyebrow">Price history</div>
-    <div class="eyebrow" id="histCount">0 weeks</div>
+  <!-- ===== FILLS ===== -->
+  <div id="paneFills" class="hidden">
+    <div class="cardsel" id="cardSel"></div>
+    <button class="btn primary" id="addFill">Log a fill-up</button>
+    <div class="form hidden" id="fillForm">
+      <div class="two">
+        <div class="field"><label class="label" for="fDate">Date</label><input class="input" id="fDate" type="date"></div>
+        <div class="field"><label class="label" for="fLitres">Litres</label><input class="input" id="fLitres" type="number" step="0.01" inputmode="decimal" placeholder="62.36"></div>
+      </div>
+      <div class="two">
+        <div class="field"><label class="label" for="fFore">Pump price &pound;/L</label><input class="input" id="fFore" type="number" step="0.0001" inputmode="decimal" placeholder="1.8990"></div>
+        <div class="field"><label class="label" for="fCard">Card</label><select class="input" id="fCard"></select></div>
+      </div>
+      <div class="field"><label class="label" for="fLoc">Location</label><input class="input txt" id="fLoc" type="text" placeholder="Shell Towcester"></div>
+      <div class="hint" id="fCalc"></div>
+      <div class="warn hidden" id="fErr"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="fSave">Save fill-up</button>
+        <button class="btn" id="fCancel" style="flex:0 0 96px">Cancel</button>
+      </div>
+    </div>
+    <div class="section"><div class="eyebrow">Fill-ups</div><div class="eyebrow" id="fillCount">0</div></div>
+    <div class="rule"></div>
+    <div id="fillBlock"></div>
   </div>
-  <div class="rule"></div>
-  <div id="histBlock"></div>
 
-  <div class="settings">
-    <span>Savings based on a <b id="tankLabel">80</b>-litre fill</span>
-    <span id="tankIdle"><button class="linkbtn" id="tankEdit">Change</button></span>
-    <span id="tankForm" class="row hidden">
-      <input class="input" id="tankInput" type="number" inputmode="decimal" style="width:84px;padding:7px 10px;font-size:14px">
-      <button class="linkbtn" id="tankDone">Done</button>
-    </span>
+  <!-- ===== BALANCE ===== -->
+  <div id="paneBal" class="hidden">
+    <div class="panel">
+      <div class="eyebrow">Outstanding &middot; unpaid</div>
+      <div class="big owed" id="balOwed" style="margin-top:10px">&pound;0.00</div>
+      <div class="hint" id="balOwedSub" style="margin-top:8px"></div>
+      <div class="kv" style="margin-top:14px"><span>This week's payment <em style="font-style:normal;opacity:.7">(last Mon&ndash;Sun)</em></span><b id="balThisWk">&pound;0.00</b></div>
+      <div class="kv"><span>Next week's payment <em style="font-style:normal;opacity:.7">(this Mon&ndash;Sun)</em></span><b id="balNextWk">&pound;0.00</b></div>
+      <div class="kv"><span>Spent this month</span><b id="balThisMo">&pound;0.00</b></div>
+      <div class="kv"><span>Spent last month</span><b id="balLastMo">&pound;0.00</b></div>
+    </div>
+
+    <div class="panel">
+      <div class="eyebrow">Saved vs pump price</div>
+      <div class="big saved" id="balSaved" style="margin-top:10px">&pound;0.00</div>
+      <div class="hint" id="balSavedSub" style="margin-top:8px"></div>
+    </div>
+
+    <button class="btn" id="addCharge">Add a service charge</button>
+    <div class="form hidden" id="chargeForm">
+      <div class="two">
+        <div class="field"><label class="label" for="cDate">Date</label><input class="input" id="cDate" type="date"></div>
+        <div class="field"><label class="label" for="cAmt">Amount &pound;</label><input class="input" id="cAmt" type="number" step="0.01" inputmode="decimal" placeholder="22.00"></div>
+      </div>
+      <div class="field"><label class="label" for="cNote">Note</label><input class="input txt" id="cNote" type="text" placeholder="Weekly service charge"></div>
+      <div class="warn hidden" id="cErr"></div>
+      <div class="row" style="margin-top:16px">
+        <button class="btn primary" id="cSave">Save charge</button>
+        <button class="btn" id="cCancel" style="flex:0 0 96px">Cancel</button>
+      </div>
+    </div>
+    <div class="section"><div class="eyebrow">Service charges</div><div class="eyebrow" id="chargeCount">0</div></div>
+    <div class="rule"></div>
+    <div id="chargeBlock"></div>
+
+    <div class="settings"><span>VAT rate</span>
+      <span class="row"><input class="input" id="vatInput" type="number" step="1" inputmode="decimal" style="width:70px;padding:7px 10px;font-size:14px"><button class="linkbtn" id="vatSave">%</button></span>
+    </div>
   </div>
 
   <div class="backup">
@@ -221,307 +224,313 @@
 </div>
 
 <script>
-(function () {
-  "use strict";
+(function(){
+"use strict";
+var DAY=86400000, KEY="fuelcard.v2";
+var state={vat:0.20,cards:["Mine","Card 2"],rates:[],fills:[],charges:[]};
+var view="all";
 
-  var DAY = 86400000;
-  var KEY = "fuelcard.v1";
-  var state = { entries: [], tank: 80 };
+/* dates */
+function mondayOf(d){var x=new Date(d.getFullYear(),d.getMonth(),d.getDate());x.setDate(x.getDate()-((x.getDay()+6)%7));return x;}
+function iso(d){var p=function(n){return String(n).padStart(2,"0")};return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());}
+function fromIso(s){var a=s.split("-").map(Number);return new Date(a[0],a[1]-1,a[2]);}
+function shortDate(s){return fromIso(s).toLocaleDateString("en-GB",{day:"2-digit",month:"short"});}
+function money(n){return (n<0?"-\u00A3":"\u00A3")+Math.abs(n).toFixed(2);}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]});}
+var $=function(id){return document.getElementById(id)};
 
-  /* ---------- dates ---------- */
-  function mondayOf(d) {
-    var x = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-    x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
-    return x;
+/* storage */
+function load(){try{var raw=localStorage.getItem(KEY);if(!raw)return;var s=JSON.parse(raw);
+  if(Array.isArray(s.rates))state.rates=s.rates;
+  if(Array.isArray(s.fills))state.fills=s.fills;
+  if(Array.isArray(s.charges))state.charges=s.charges;
+  if(Array.isArray(s.cards)&&s.cards.length)state.cards=s.cards;
+  if(typeof s.vat==="number"&&s.vat>=0)state.vat=s.vat;}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(state));return true}catch(e){return false}}
+
+/* derived */
+function rateFor(dateIso){var wk=iso(mondayOf(fromIso(dateIso)));
+  var m=state.rates.filter(function(r){return r.weekStart===wk})[0];return m?m.exVat:null;}
+function incVat(ex){return ex*(1+state.vat);}
+function fillCost(f){var ex=(typeof f.exVat==="number")?f.exVat:rateFor(f.date);
+  if(ex===null)return null;return f.litres*incVat(ex);}
+function fillSaving(f){var c=fillCost(f);if(c===null||typeof f.forecourt!=="number")return null;
+  return f.litres*f.forecourt-c;}
+function inView(x){return view==="all"||x.card===view;}
+function visibleFills(){return state.fills.filter(inView);}
+function sumBetween(a,b){var s=0;visibleFills().forEach(function(f){
+  if(f.date>=a&&f.date<=b){var c=fillCost(f);if(c!==null)s+=c;}});return s;}
+
+/* ===== render ===== */
+function render(){renderTotem();renderRates();renderTrend();renderCardSel();renderFills();renderBalance();
+  $("vatInput").value=Math.round(state.vat*100);}
+
+function renderTotem(){
+  var today=new Date(),tm=new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  var thisMon=mondayOf(today),nextMon=new Date(thisMon.getTime()+7*DAY);
+  var cur=state.rates.filter(function(r){return r.weekStart===iso(thisMon)})[0];
+  var nxt=state.rates.filter(function(r){return r.weekStart===iso(nextMon)})[0];
+
+  $("curNum").textContent=cur?cur.exVat.toFixed(4):"\u2014";
+  $("curNum").className="num"+(cur?"":" dim");
+  $("curSub").textContent=cur?money(incVat(cur.exVat))+"/L inc VAT":"not logged";
+
+  var days=Math.round((nextMon-tm)/DAY);
+  $("nextNum").textContent=nxt?nxt.exVat.toFixed(4):"\u2014";
+  $("nextNum").className="num"+(nxt?"":" dim");
+  $("nextSub").textContent=nxt?(money(incVat(nxt.exVat))+"/L \u00b7 "+(days>0?"in "+days+"d":"live")):"awaiting email";
+
+  var cls="idle",text="Log this week's rate to get started",sub="";
+  if(cur&&!nxt){text="No new rate in yet";
+    sub="Friday's email sets the rate for the week beginning "+shortDate(iso(nextMon))+".";}
+  else if(cur&&nxt){
+    var diff=+(incVat(nxt.exVat)-incVat(cur.exVat)).toFixed(5);
+    var swing=Math.abs(diff),litres=avgLitres()||60,saving=swing*litres;
+    if(swing<0.0005){cls="flat";text="No real change";sub="Same rate either side of the weekend \u2014 fill whenever suits.";}
+    else if(diff<0){cls="wait";text="Hold on \u2014 fill after Monday";
+      sub="Dropping "+(swing*100).toFixed(2)+"p a litre inc VAT. Waiting saves about "+money(swing*litres)+" on a "+Math.round(litres)+"-litre fill.";}
+    else{cls="fill";text="Fill up before Sunday night";
+      sub="Rising "+(swing*100).toFixed(2)+"p a litre inc VAT. Filling now saves about "+money(saving)+" on a "+Math.round(litres)+"-litre fill.";}
   }
-  function iso(d) {
-    var p = function (n) { return String(n).padStart(2, "0"); };
-    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
-  }
-  function fromIso(s) {
-    var a = s.split("-").map(Number);
-    return new Date(a[0], a[1] - 1, a[2]);
-  }
-  function shortDate(s) {
-    return fromIso(s).toLocaleDateString("en-GB", { day: "2-digit", month: "short" });
-  }
+  $("bar").className="bar "+cls;$("barText").textContent=text;$("barSub").textContent=sub;
+}
+function avgLitres(){var f=visibleFills().slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
+  if(f.length<2)return null;return f.reduce(function(a,x){return a+x.litres},0)/f.length;}
 
-  /* ---------- storage ---------- */
-  function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (!raw) return;
-      var s = JSON.parse(raw);
-      if (s && Array.isArray(s.entries)) state.entries = s.entries;
-      if (s && typeof s.tank === "number" && s.tank > 0) state.tank = s.tank;
-    } catch (e) { /* start fresh */ }
-  }
-  function save() {
-    try {
-      localStorage.setItem(KEY, JSON.stringify(state));
-      return true;
-    } catch (e) { return false; }
-  }
+function renderRates(){
+  var s=state.rates.slice().sort(function(a,b){return a.weekStart<b.weekStart?1:-1});
+  $("rateCount").textContent=s.length+(s.length===1?" week":" weeks");
+  if(!s.length){$("rateBlock").innerHTML='<div class="empty">No rates yet. Add the rate you\'re on now, then Friday\'s new one.</div>';return;}
+  var ul=document.createElement("ul");ul.className="hist";
+  s.forEach(function(e,i){
+    var prev=s[i+1],d=prev?+(e.exVat-prev.exVat).toFixed(4):null;
+    var c=d===null||Math.abs(d)<0.0005?"same":d>0?"up":"down";
+    var li=document.createElement("li");
+    var w=document.createElement("span");w.className="hist-week";w.textContent="w/c "+shortDate(e.weekStart);
+    var p=document.createElement("span");p.className="hist-price";p.textContent=e.exVat.toFixed(4);
+    var dl=document.createElement("span");dl.className="delta "+c;
+    dl.textContent=d===null?"\u2014":(d>0?"\u25b2 ":d<0?"\u25bc ":"= ")+(Math.abs(d)*100).toFixed(2)+"p";
+    var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
+    b.setAttribute("aria-label","Delete rate for week commencing "+shortDate(e.weekStart));
+    b.addEventListener("click",function(){state.rates=state.rates.filter(function(x){return x.weekStart!==e.weekStart});save();render();});
+    li.appendChild(w);li.appendChild(p);li.appendChild(dl);li.appendChild(b);ul.appendChild(li);
+  });
+  $("rateBlock").innerHTML="";$("rateBlock").appendChild(ul);
+}
 
-  /* ---------- elements ---------- */
-  var $ = function (id) { return document.getElementById(id); };
+function renderTrend(){
+  var data=state.rates.slice().sort(function(a,b){return a.weekStart<b.weekStart?-1:1}).slice(-12);
+  if(data.length<2){$("trendBlock").classList.add("hidden");return;}
+  $("trendBlock").classList.remove("hidden");
+  var W=424,H=92,pad=6,vals=data.map(function(d){return d.exVat});
+  var lo=Math.min.apply(null,vals)-.02,hi=Math.max.apply(null,vals)+.02,span=(hi-lo)||1;
+  var step=(W-pad*2)/Math.max(data.length-1,1);
+  var pts=data.map(function(d,i){return[pad+i*step,pad+(1-(d.exVat-lo)/span)*(H-pad*2)]});
+  var line=pts.map(function(p,i){return(i?"L":"M")+p[0].toFixed(1)+","+p[1].toFixed(1)}).join(" ");
+  var area=line+" L"+pts[pts.length-1][0].toFixed(1)+","+H+" L"+pts[0][0].toFixed(1)+","+H+" Z";
+  var dots=pts.map(function(p){return'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="2.6" fill="#0C181C" stroke="#F2B33D" stroke-width="1.6"/>'}).join("");
+  $("trend").innerHTML='<defs><linearGradient id="fcA" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F2B33D" stop-opacity="0.28"/><stop offset="100%" stop-color="#F2B33D" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#fcA)"/><path d="'+line+'" fill="none" stroke="#F2B33D" stroke-width="2" stroke-linejoin="round"/>'+dots;
+  $("trendLabel").textContent="Last "+data.length+" weeks";
+  $("trendRange").textContent=Math.min.apply(null,vals).toFixed(4)+" \u2013 "+Math.max.apply(null,vals).toFixed(4);
+}
 
-  /* ---------- render ---------- */
-  function render() {
-    var today = new Date();
-    var todayMid = new Date(today.getFullYear(), today.getMonth(), today.getDate());
-    var thisMon = mondayOf(today);
-    var nextMon = new Date(thisMon.getTime() + 7 * DAY);
+function renderCardSel(){
+  var el=$("cardSel");el.innerHTML="";
+  if(state.cards.length<2){el.classList.add("hidden");return;}
+  el.classList.remove("hidden");
+  ["all"].concat(state.cards).forEach(function(c){
+    var b=document.createElement("button");
+    b.textContent=c==="all"?"All":c;
+    b.setAttribute("aria-pressed",view===c?"true":"false");
+    b.addEventListener("click",function(){view=c;render();});
+    el.appendChild(b);
+  });
+}
 
-    var cur = state.entries.filter(function (e) { return e.weekStart === iso(thisMon); })[0];
-    var nxt = state.entries.filter(function (e) { return e.weekStart === iso(nextMon); })[0];
+function renderFills(){
+  var s=visibleFills().slice().sort(function(a,b){return a.date<b.date?1:-1});
+  $("fillCount").textContent=s.length+" logged";
+  if(!s.length){$("fillBlock").innerHTML='<div class="empty">No fill-ups yet. Log the litres and pump price \u2014 the cost and your saving come from that week\'s rate.</div>';return;}
+  var ul=document.createElement("ul");ul.className="hist";
+  s.slice(0,60).forEach(function(f){
+    var cost=fillCost(f),sav=fillSaving(f);
+    var li=document.createElement("li");
+    var m=document.createElement("div");m.className="fmain";
+    var l1=document.createElement("div");l1.className="f1";l1.textContent=cost===null?"no rate logged":money(cost);
+    var l2=document.createElement("div");l2.className="f2";
+    var bits=[shortDate(f.date),f.litres.toFixed(2)+"L"];
+    if(f.location)bits.push(f.location);
+    if(state.cards.length>1&&view==="all")bits.push(f.card);
+    l2.textContent=bits.join(" \u00b7 ");
+    m.appendChild(l1);m.appendChild(l2);
+    var sv=document.createElement("span");sv.className="fsave";
+    sv.textContent=sav===null?"":"+"+money(sav);
+    var pd=document.createElement("button");pd.className="chip "+(f.paid?"on":"off");
+    pd.textContent=f.paid?"paid":"due";
+    pd.addEventListener("click",function(){f.paid=!f.paid;save();render();});
+    var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
+    b.setAttribute("aria-label","Delete fill-up on "+shortDate(f.date));
+    b.addEventListener("click",function(){state.fills=state.fills.filter(function(x){return x.id!==f.id});save();render();});
+    li.appendChild(m);li.appendChild(sv);li.appendChild(pd);li.appendChild(b);ul.appendChild(li);
+  });
+  $("fillBlock").innerHTML="";$("fillBlock").appendChild(ul);
+}
 
-    $("curNum").innerHTML = (cur ? cur.pence.toFixed(1) : "&ndash;&ndash;.&ndash;") + '<span class="unit">p</span>';
-    $("curNum").className = "num" + (cur ? "" : " dim");
-    $("curSub").textContent = cur ? "w/c " + shortDate(cur.weekStart) : "not logged";
+function renderBalance(){
+  var now=new Date(),tm=new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  var thisMon=mondayOf(now),lastMon=new Date(thisMon.getTime()-7*DAY),lastSun=new Date(thisMon.getTime()-DAY);
+  var thisSun=new Date(thisMon.getTime()+6*DAY);
 
-    var days = Math.round((nextMon - todayMid) / DAY);
-    $("nextNum").innerHTML = (nxt ? nxt.pence.toFixed(1) : "&ndash;&ndash;.&ndash;") + '<span class="unit">p</span>';
-    $("nextNum").className = "num" + (nxt ? "" : " dim");
-    $("nextSub").textContent = nxt
-      ? (days > 0 ? "live in " + days + " day" + (days === 1 ? "" : "s") : "live now")
-      : "awaiting email";
+  var owed=0,unpriced=0;
+  visibleFills().forEach(function(f){if(f.paid)return;var c=fillCost(f);if(c===null)unpriced++;else owed+=c;});
+  state.charges.filter(inView).forEach(function(c){if(!c.paid)owed+=c.amount;});
+  $("balOwed").textContent=money(owed);
+  $("balOwedSub").textContent=unpriced?unpriced+" unpaid fill-up"+(unpriced===1?"":"s")+" have no rate logged and aren't counted.":"Everything with a rate logged is counted.";
 
-    var cls = "idle", text = "Log this week's rate to get started", sub = "";
-    if (cur && !nxt) {
-      text = "No new rate in yet";
-      sub = "Friday's email sets the price for the week beginning " + shortDate(iso(nextMon)) + ".";
-    } else if (cur && nxt) {
-      var diff = +(nxt.pence - cur.pence).toFixed(2);
-      var swing = Math.abs(diff);
-      var money = (swing * state.tank) / 100;
-      if (swing < 0.05) {
-        cls = "flat";
-        text = "No real change";
-        sub = "Same rate either side of the weekend — fill whenever suits.";
-      } else if (diff < 0) {
-        cls = "wait";
-        text = "Hold on — fill after Monday";
-        sub = "Dropping " + swing.toFixed(1) + "p a litre. Waiting saves about £" +
-              money.toFixed(2) + " on a " + state.tank + "-litre fill.";
-      } else {
-        cls = "fill";
-        text = "Fill up before Sunday night";
-        sub = "Rising " + swing.toFixed(1) + "p a litre. Filling now saves about £" +
-              money.toFixed(2) + " on a " + state.tank + "-litre fill.";
-      }
-    }
-    $("bar").className = "bar " + cls;
-    $("barText").textContent = text;
-    $("barSub").textContent = sub;
+  $("balThisWk").textContent=money(sumBetween(iso(lastMon),iso(lastSun)));
+  $("balNextWk").textContent=money(sumBetween(iso(thisMon),iso(thisSun)));
+  $("balThisMo").textContent=money(sumBetween(iso(new Date(now.getFullYear(),now.getMonth(),1)),iso(new Date(now.getFullYear(),now.getMonth()+1,0))));
+  $("balLastMo").textContent=money(sumBetween(iso(new Date(now.getFullYear(),now.getMonth()-1,1)),iso(new Date(now.getFullYear(),now.getMonth(),0))));
 
-    renderHistory();
-    renderTrend();
-    $("tankLabel").textContent = state.tank;
-  }
+  var gross=0,n=0;
+  visibleFills().forEach(function(f){var s=fillSaving(f);if(s!==null){gross+=s;n++;}});
+  var chg=state.charges.filter(inView).reduce(function(a,c){return a+c.amount},0);
+  $("balSaved").textContent=money(gross-chg);
+  $("balSavedSub").textContent=n?("Across "+n+" fill-up"+(n===1?"":"s")+", after "+money(chg)+" of service charges."):"Log a pump price with each fill to track this.";
 
-  function renderHistory() {
-    var sorted = state.entries.slice().sort(function (a, b) {
-      return a.weekStart < b.weekStart ? 1 : -1;
+  var cs=state.charges.filter(inView).slice().sort(function(a,b){return(a.date||"")<(b.date||"")?1:-1});
+  $("chargeCount").textContent=cs.length;
+  if(!cs.length){$("chargeBlock").innerHTML='<div class="empty">No service charges logged.</div>';}
+  else{
+    var ul=document.createElement("ul");ul.className="hist";
+    cs.forEach(function(c){
+      var li=document.createElement("li");
+      var m=document.createElement("div");m.className="fmain";
+      var l1=document.createElement("div");l1.className="f1";l1.textContent=money(c.amount);
+      var l2=document.createElement("div");l2.className="f2";
+      l2.textContent=[c.date?shortDate(c.date):"no date",c.note||"service charge"].join(" \u00b7 ");
+      m.appendChild(l1);m.appendChild(l2);
+      var pd=document.createElement("button");pd.className="chip "+(c.paid?"on":"off");pd.textContent=c.paid?"paid":"due";
+      pd.addEventListener("click",function(){c.paid=!c.paid;save();render();});
+      var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
+      b.setAttribute("aria-label","Delete service charge");
+      b.addEventListener("click",function(){state.charges=state.charges.filter(function(x){return x.id!==c.id});save();render();});
+      li.appendChild(m);li.appendChild(pd);li.appendChild(b);ul.appendChild(li);
     });
-    $("histCount").textContent = sorted.length + (sorted.length === 1 ? " week" : " weeks");
-
-    if (!sorted.length) {
-      $("histBlock").innerHTML =
-        '<div class="empty">Nothing logged yet. Add the rate you\'re on this week, ' +
-        "then add Friday's new one — the panel above will tell you which side of " +
-        "the weekend to fill on.</div>";
-      return;
-    }
-
-    var ul = document.createElement("ul");
-    ul.className = "hist";
-    sorted.forEach(function (e, i) {
-      var prev = sorted[i + 1];
-      var d = prev ? +(e.pence - prev.pence).toFixed(2) : null;
-      var c = d === null || Math.abs(d) < 0.05 ? "same" : d > 0 ? "up" : "down";
-      var mark = d === null ? "—" : (d > 0 ? "▲ " : d < 0 ? "▼ " : "= ") + Math.abs(d).toFixed(1) + "p";
-
-      var li = document.createElement("li");
-
-      var w = document.createElement("span");
-      w.className = "hist-week";
-      w.textContent = "w/c " + shortDate(e.weekStart);
-
-      var p = document.createElement("span");
-      p.className = "hist-price";
-      p.textContent = e.pence.toFixed(1) + "p";
-
-      var dl = document.createElement("span");
-      dl.className = "delta " + c;
-      dl.textContent = mark;
-
-      var b = document.createElement("button");
-      b.className = "icon";
-      b.textContent = "×";
-      b.setAttribute("aria-label", "Delete price for week commencing " + shortDate(e.weekStart));
-      b.addEventListener("click", function () {
-        state.entries = state.entries.filter(function (x) { return x.weekStart !== e.weekStart; });
-        save();
-        render();
-      });
-
-      li.appendChild(w); li.appendChild(p); li.appendChild(dl); li.appendChild(b);
-      ul.appendChild(li);
-    });
-
-    $("histBlock").innerHTML = "";
-    $("histBlock").appendChild(ul);
+    $("chargeBlock").innerHTML="";$("chargeBlock").appendChild(ul);
   }
+}
 
-  function renderTrend() {
-    var data = state.entries.slice().sort(function (a, b) {
-      return a.weekStart < b.weekStart ? -1 : 1;
-    }).slice(-10);
+/* ===== forms ===== */
+function openRate(){var tm=mondayOf(new Date()),nm=new Date(tm.getTime()+7*DAY);
+  $("rateWeek").value=iso(state.rates.length===0?tm:nm);rateHint();$("rateVal").value="";
+  $("rateErr").classList.add("hidden");$("rateCalc").textContent="";
+  $("rateForm").classList.remove("hidden");$("addRate").classList.add("hidden");$("rateVal").focus();}
+function rateHint(){var v=$("rateWeek").value;
+  $("rateHint").textContent=v?"Snaps to the Monday. Runs "+shortDate(v)+" to the Sunday.":"";}
+function rateCalc(){var v=parseFloat($("rateVal").value);
+  $("rateCalc").textContent=isNaN(v)||v<=0?"":"= "+money(incVat(v))+" a litre inc VAT at "+Math.round(state.vat*100)+"%.";}
+function saveRate(){var v=parseFloat($("rateVal").value),err="";
+  if(isNaN(v)||v<=0)err="Enter the ex-VAT rate in pounds, like 1.4364";
+  else if(v>5)err="That looks like pence. Enter pounds per litre, like 1.4364";
+  else if(!$("rateWeek").value)err="Pick the week this rate starts.";
+  if(err){$("rateErr").textContent=err;$("rateErr").classList.remove("hidden");return;}
+  var wk=iso(mondayOf(fromIso($("rateWeek").value)));
+  state.rates=state.rates.filter(function(r){return r.weekStart!==wk});
+  state.rates.push({weekStart:wk,exVat:+v.toFixed(4)});
+  if(!save()){$("rateErr").textContent="That didn't save \u2014 your browser is blocking storage.";$("rateErr").classList.remove("hidden");return;}
+  $("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden");render();}
 
-    if (data.length < 2) { $("trendBlock").classList.add("hidden"); return; }
-    $("trendBlock").classList.remove("hidden");
+function openFill(){
+  var last=state.fills.slice().sort(function(a,b){return a.date<b.date?1:-1})[0];
+  $("fDate").value=iso(new Date());$("fLitres").value="";
+  $("fFore").value=last&&last.forecourt?last.forecourt:"";
+  $("fLoc").value=last?last.location||"":"";
+  var sel=$("fCard");sel.innerHTML="";
+  state.cards.forEach(function(c){var o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o);});
+  if(view!=="all")sel.value=view;
+  $("fErr").classList.add("hidden");fillCalc();
+  $("fillForm").classList.remove("hidden");$("addFill").classList.add("hidden");$("fLitres").focus();}
+function fillCalc(){
+  var l=parseFloat($("fLitres").value),d=$("fDate").value,fo=parseFloat($("fFore").value);
+  if(!d||isNaN(l)||l<=0){$("fCalc").textContent="";return;}
+  var ex=rateFor(d);
+  if(ex===null){$("fCalc").textContent="No rate logged for that week \u2014 add it on the Rates tab first.";return;}
+  var cost=l*incVat(ex),t="Card cost "+money(cost)+" ("+money(ex)+"/L ex VAT).";
+  if(!isNaN(fo)&&fo>0)t+=" Pump would be "+money(l*fo)+" \u2014 saving "+money(l*fo-cost)+".";
+  $("fCalc").textContent=t;}
+function saveFill(){
+  var l=parseFloat($("fLitres").value),d=$("fDate").value,fo=parseFloat($("fFore").value),err="";
+  if(!d)err="Pick the date.";
+  else if(isNaN(l)||l<=0)err="Enter how many litres went in.";
+  else if(l>2000)err="That looks off for litres. Check the figure.";
+  else if($("fFore").value.trim()!==""&&(isNaN(fo)||fo<=0||fo>10))err="Pump price should be pounds per litre, like 1.8990";
+  if(err){$("fErr").textContent=err;$("fErr").classList.remove("hidden");return;}
+  var f={id:String(Date.now())+Math.random().toString(36).slice(2,7),card:$("fCard").value,
+    date:d,litres:+l.toFixed(2),location:$("fLoc").value.trim().slice(0,60),paid:false};
+  if(!isNaN(fo)&&fo>0)f.forecourt=+fo.toFixed(4);
+  state.fills.push(f);
+  if(!save()){$("fErr").textContent="That didn't save \u2014 your browser is blocking storage.";$("fErr").classList.remove("hidden");return;}
+  $("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");render();}
 
-    var W = 424, H = 92, pad = 6;
-    var vals = data.map(function (d) { return d.pence; });
-    var lo = Math.min.apply(null, vals) - 0.6;
-    var hi = Math.max.apply(null, vals) + 0.6;
-    var span = (hi - lo) || 1;
-    var step = (W - pad * 2) / Math.max(data.length - 1, 1);
+function openCharge(){$("cDate").value=iso(new Date());$("cAmt").value="";$("cNote").value="";
+  $("cErr").classList.add("hidden");$("chargeForm").classList.remove("hidden");$("addCharge").classList.add("hidden");$("cAmt").focus();}
+function saveCharge(){var a=parseFloat($("cAmt").value);
+  if(isNaN(a)||a===0){$("cErr").textContent="Enter the charge amount in pounds.";$("cErr").classList.remove("hidden");return;}
+  state.charges.push({id:String(Date.now())+Math.random().toString(36).slice(2,7),
+    card:view==="all"?state.cards[0]:view,date:$("cDate").value||null,
+    amount:+Math.abs(a).toFixed(2),note:$("cNote").value.trim().slice(0,60),paid:false});
+  save();$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");render();}
 
-    var pts = data.map(function (d, i) {
-      return [pad + i * step, pad + (1 - (d.pence - lo) / span) * (H - pad * 2)];
-    });
-    var line = pts.map(function (p, i) {
-      return (i ? "L" : "M") + p[0].toFixed(1) + "," + p[1].toFixed(1);
-    }).join(" ");
-    var area = line + " L" + pts[pts.length - 1][0].toFixed(1) + "," + H +
-               " L" + pts[0][0].toFixed(1) + "," + H + " Z";
+/* backup */
+function exportData(){
+  var blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);
+  a.download="fuel-card-backup-"+iso(new Date())+".json";a.click();URL.revokeObjectURL(a.href);}
+function importData(file){var r=new FileReader();
+  r.onload=function(){try{var s=JSON.parse(r.result);
+    if(!s||!Array.isArray(s.rates))throw new Error("bad");
+    state.rates=s.rates;state.fills=Array.isArray(s.fills)?s.fills:[];
+    state.charges=Array.isArray(s.charges)?s.charges:[];
+    if(Array.isArray(s.cards)&&s.cards.length)state.cards=s.cards;
+    if(typeof s.vat==="number")state.vat=s.vat;
+    save();view="all";render();
+  }catch(e){alert("That file isn't a fuel card backup. Pick the .json file this app saved.");}};
+  r.readAsText(file);}
 
-    var dots = pts.map(function (p) {
-      return '<circle cx="' + p[0].toFixed(1) + '" cy="' + p[1].toFixed(1) +
-             '" r="2.6" fill="#0C181C" stroke="#F2B33D" stroke-width="1.6"/>';
-    }).join("");
+/* tabs */
+function showTab(w){
+  $("tabRates").setAttribute("aria-selected",w==="rates");
+  $("tabFills").setAttribute("aria-selected",w==="fills");
+  $("tabBal").setAttribute("aria-selected",w==="bal");
+  $("paneRates").classList.toggle("hidden",w!=="rates");
+  $("paneFills").classList.toggle("hidden",w!=="fills");
+  $("paneBal").classList.toggle("hidden",w!=="bal");}
 
-    $("trend").innerHTML =
-      '<defs><linearGradient id="fcArea" x1="0" y1="0" x2="0" y2="1">' +
-      '<stop offset="0%" stop-color="#F2B33D" stop-opacity="0.28"/>' +
-      '<stop offset="100%" stop-color="#F2B33D" stop-opacity="0"/></linearGradient></defs>' +
-      '<path d="' + area + '" fill="url(#fcArea)"/>' +
-      '<path d="' + line + '" fill="none" stroke="#F2B33D" stroke-width="2" stroke-linejoin="round"/>' +
-      dots;
+/* wiring */
+$("tabRates").addEventListener("click",function(){showTab("rates")});
+$("tabFills").addEventListener("click",function(){showTab("fills")});
+$("tabBal").addEventListener("click",function(){showTab("bal")});
+$("addRate").addEventListener("click",openRate);
+$("rateCancel").addEventListener("click",function(){$("rateForm").classList.add("hidden");$("addRate").classList.remove("hidden");});
+$("rateSave").addEventListener("click",saveRate);
+$("rateVal").addEventListener("input",rateCalc);
+$("rateVal").addEventListener("keydown",function(e){if(e.key==="Enter")saveRate()});
+$("rateWeek").addEventListener("change",function(){if($("rateWeek").value)$("rateWeek").value=iso(mondayOf(fromIso($("rateWeek").value)));rateHint();});
+$("addFill").addEventListener("click",openFill);
+$("fCancel").addEventListener("click",function(){$("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");});
+$("fSave").addEventListener("click",saveFill);
+["fLitres","fFore","fDate"].forEach(function(id){$(id).addEventListener("input",fillCalc);$(id).addEventListener("change",fillCalc);});
+$("addCharge").addEventListener("click",openCharge);
+$("cCancel").addEventListener("click",function(){$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");});
+$("cSave").addEventListener("click",saveCharge);
+$("vatSave").addEventListener("click",function(){var v=parseFloat($("vatInput").value);
+  if(!isNaN(v)&&v>=0&&v<100){state.vat=v/100;save();render();}});
+$("exportBtn").addEventListener("click",exportData);
+$("importBtn").addEventListener("click",function(){$("importFile").click()});
+$("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
 
-    $("trendLabel").textContent = "Last " + data.length + " weeks";
-    $("trendRange").textContent =
-      Math.min.apply(null, vals).toFixed(1) + "p – " + Math.max.apply(null, vals).toFixed(1) + "p";
-  }
-
-  /* ---------- form ---------- */
-  function openForm() {
-    var thisMon = mondayOf(new Date());
-    var nextMon = new Date(thisMon.getTime() + 7 * DAY);
-    $("week").value = iso(state.entries.length === 0 ? thisMon : nextMon);
-    updateWeekHint();
-    $("price").value = "";
-    $("formErr").classList.add("hidden");
-    $("form").classList.remove("hidden");
-    $("addBtn").classList.add("hidden");
-    $("price").focus();
-  }
-  function closeForm() {
-    $("form").classList.add("hidden");
-    $("addBtn").classList.remove("hidden");
-  }
-  function updateWeekHint() {
-    var v = $("week").value;
-    $("weekHint").textContent = v
-      ? "Snaps to the Monday. This rate runs " + shortDate(v) + " through to the Sunday."
-      : "";
-  }
-  function submit() {
-    var p = parseFloat($("price").value);
-    var err = "";
-    if (isNaN(p) || p <= 0) err = "Enter the price in pence, like 132.4";
-    else if (p < 20 || p > 400) err = "That looks off for pence per litre. Check the figure.";
-    else if (!$("week").value) err = "Pick the week this rate starts.";
-
-    if (err) {
-      $("formErr").textContent = err;
-      $("formErr").classList.remove("hidden");
-      return;
-    }
-    var wk = iso(mondayOf(fromIso($("week").value)));
-    state.entries = state.entries.filter(function (e) { return e.weekStart !== wk; });
-    state.entries.push({ weekStart: wk, pence: +p.toFixed(2) });
-
-    if (!save()) {
-      $("formErr").textContent = "That didn't save. Your browser is blocking storage — check private browsing is off.";
-      $("formErr").classList.remove("hidden");
-      return;
-    }
-    closeForm();
-    render();
-  }
-
-  /* ---------- backup ---------- */
-  function exportData() {
-    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-    var a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "fuel-card-backup-" + iso(new Date()) + ".json";
-    a.click();
-    URL.revokeObjectURL(a.href);
-  }
-  function importData(file) {
-    var r = new FileReader();
-    r.onload = function () {
-      try {
-        var s = JSON.parse(r.result);
-        if (!s || !Array.isArray(s.entries)) throw new Error("bad file");
-        state.entries = s.entries;
-        if (typeof s.tank === "number" && s.tank > 0) state.tank = s.tank;
-        save();
-        render();
-      } catch (e) {
-        alert("That file isn't a fuel card backup. Pick the .json file this app saved.");
-      }
-    };
-    r.readAsText(file);
-  }
-
-  /* ---------- wiring ---------- */
-  $("addBtn").addEventListener("click", openForm);
-  $("cancelBtn").addEventListener("click", closeForm);
-  $("saveBtn").addEventListener("click", submit);
-  $("price").addEventListener("keydown", function (e) { if (e.key === "Enter") submit(); });
-  $("week").addEventListener("change", function () {
-    if ($("week").value) $("week").value = iso(mondayOf(fromIso($("week").value)));
-    updateWeekHint();
-  });
-
-  $("tankEdit").addEventListener("click", function () {
-    $("tankInput").value = state.tank;
-    $("tankIdle").classList.add("hidden");
-    $("tankForm").classList.remove("hidden");
-    $("tankInput").focus();
-  });
-  $("tankDone").addEventListener("click", function () {
-    var v = parseFloat($("tankInput").value);
-    if (!isNaN(v) && v > 0) { state.tank = v; save(); }
-    $("tankForm").classList.add("hidden");
-    $("tankIdle").classList.remove("hidden");
-    render();
-  });
-
-  $("exportBtn").addEventListener("click", exportData);
-  $("importBtn").addEventListener("click", function () { $("importFile").click(); });
-  $("importFile").addEventListener("change", function (e) {
-    if (e.target.files && e.target.files[0]) importData(e.target.files[0]);
-    e.target.value = "";
-  });
-
-  load();
-  render();
+load();render();
 })();
 </script>
 </body>
