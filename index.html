@@ -75,6 +75,10 @@
   .fmain{flex:1;min-width:0}
   .f1{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:15px;font-weight:600}
   .f2{font-size:11px;color:var(--mute);margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  ul.hist li.wk{padding:18px 2px 7px;border-bottom:1px solid var(--edge)}
+  ul.hist li.wk:first-child{padding-top:2px}
+  .wk-label{font-family:'Archivo',sans-serif;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--mute);flex:1}
+  .wk-total{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:12px;font-weight:600;color:var(--mute);flex:0 0 auto}
   .fsave{font-family:'IBM Plex Mono',monospace;font-variant-numeric:tabular-nums;font-size:12.5px;color:var(--go);flex:0 0 auto}
   .empty{border:1px dashed var(--edge);border-radius:12px;padding:20px 18px;text-align:center;color:var(--mute);font-size:13.5px;line-height:1.55}
   .settings{margin-top:22px;display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13px;color:var(--mute)}
@@ -175,9 +179,10 @@
       <div class="cardsel" id="cardSel"></div>
       <button class="linkbtn" id="manageCards" style="margin-top:10px">Manage cards</button>
       <div class="form hidden" id="cardForm">
-        <div class="field"><label class="label" for="cardNames">Card names, one per line</label>
-          <textarea class="input txt" id="cardNames" rows="4" style="resize:vertical"></textarea>
-          <div class="hint">Renaming a card here also renames it on every fill-up already logged.</div></div>
+        <label class="label">Your cards</label>
+        <div id="cardList"></div>
+        <button class="btn" id="cardAdd" style="margin-top:10px">Add another card</button>
+        <div class="hint">Give each card a name you'll recognise \u2014 a driver, a vehicle, a reg. Renaming one updates every fill-up already logged against it.</div>
         <div class="warn hidden" id="cardErr"></div>
         <div class="row" style="margin-top:14px">
           <button class="btn primary" id="cardSave">Save cards</button>
@@ -477,7 +482,8 @@ function renderTrend(){
 
 function renderCardSel(){
   var el=$("cardSel");el.innerHTML="";
-  if(state.cards.length<2){el.classList.add("hidden");return;}
+  if(state.cards.length<2){el.classList.add("hidden");$("manageCards").textContent="Add another card";return;}
+  $("manageCards").textContent="Manage cards";
   el.classList.remove("hidden");
   ["all"].concat(state.cards).forEach(function(c){
     var b=document.createElement("button");b.textContent=c==="all"?"All":c;
@@ -490,7 +496,22 @@ function renderFills(){
   $("fillCount").textContent=s.length+" logged";
   if(!s.length){$("fillBlock").innerHTML='<div class="empty">No fill-ups yet. Log the litres and pump price \u2014 the cost and your saving come from that week\'s rate.</div>';return;}
   var ul=document.createElement("ul");ul.className="hist";
+  var curWk=null;
   s.slice(0,80).forEach(function(f){
+    var wk=iso(mondayOf(fromIso(f.date)));
+    if(wk!==curWk){
+      curWk=wk;
+      var tot=0,priced=false;
+      s.forEach(function(x){
+        if(iso(mondayOf(fromIso(x.date)))!==wk)return;
+        var c=fillCost(x);if(c!==null){tot+=c;priced=true;}});
+      var h=document.createElement("li");h.className="wk";
+      var hl=document.createElement("span");hl.className="wk-label";
+      hl.textContent="w/c "+shortDate(wk);
+      var ht=document.createElement("span");ht.className="wk-total";
+      ht.textContent=priced?money(tot):"";
+      h.appendChild(hl);h.appendChild(ht);ul.appendChild(h);
+    }
     var cost=fillCost(f),sav=fillSaving(f);
     var li=document.createElement("li");
     var m=document.createElement("div");m.className="fmain";
@@ -648,27 +669,71 @@ function saveCharge(){
     $("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden");render();});
 }
 
-function openCards(){$("cardNames").value=state.cards.join("\n");msg($("cardErr"),"","warn");
+var cardDraft=[];
+function usageOf(name){
+  var f=state.fills.filter(function(x){return x.card===name}).length;
+  var c=state.charges.filter(function(x){return x.card===name}).length;
+  return f+c;}
+function renderCardList(){
+  var el=$("cardList");el.innerHTML="";
+  cardDraft.forEach(function(row,i){
+    var wrap=document.createElement("div");
+    wrap.className="row";wrap.style.marginBottom="8px";
+    var inp=document.createElement("input");
+    inp.className="input txt";inp.type="text";inp.value=row.name;
+    inp.placeholder="Card name";inp.maxLength=40;
+    inp.setAttribute("aria-label","Card name");
+    inp.addEventListener("input",function(){row.name=inp.value});
+    var del=document.createElement("button");
+    del.className="icon";del.textContent="\u00d7";del.style.flex="0 0 auto";
+    del.setAttribute("aria-label","Remove this card");
+    del.addEventListener("click",function(){
+      if(cardDraft.length<2){msg($("cardErr"),"Keep at least one card.","warn");return;}
+      cardDraft.splice(i,1);renderCardList();});
+    wrap.appendChild(inp);wrap.appendChild(del);
+    if(row.orig){
+      var u=usageOf(row.orig);
+      if(u){var tag=document.createElement("span");
+        tag.className="hint";tag.style.cssText="flex:0 0 auto;margin:0;align-self:center;min-width:52px;text-align:right";
+        tag.textContent=u+(u===1?" entry":" entries");wrap.appendChild(tag);}
+    }
+    el.appendChild(wrap);
+  });}
+function openCards(){
+  cardDraft=state.cards.map(function(c){return{orig:c,name:c}});
+  msg($("cardErr"),"","warn");renderCardList();
   $("cardForm").classList.remove("hidden");}
 function saveCards(){
-  var names=$("cardNames").value.split("\n").map(function(s){return s.trim().slice(0,40)}).filter(Boolean);
+  var names=cardDraft.map(function(r){return r.name.trim().slice(0,40)});
+  if(names.some(function(x){return !x})){msg($("cardErr"),"Every card needs a name.","warn");return;}
   if(!names.length){msg($("cardErr"),"Keep at least one card.","warn");return;}
-  var old=state.cards.slice();
+  var seen={};
+  for(var i=0;i<names.length;i++){
+    if(seen[names[i].toLowerCase()]){msg($("cardErr"),"Two cards can't share the name \u201c"+names[i]+"\u201d.","warn");return;}
+    seen[names[i].toLowerCase()]=1;}
+
+  var renames=[],removed=[];
+  cardDraft.forEach(function(r,i){if(r.orig&&r.orig!==names[i])renames.push([r.orig,names[i]]);});
+  state.cards.forEach(function(c){
+    if(!cardDraft.some(function(r){return r.orig===c}))removed.push(c);});
+
+  var moved=removed.reduce(function(a,c){return a+usageOf(c)},0);
+  if(moved&&!confirm(moved+" entr"+(moved===1?"y is":"ies are")+" logged against "+
+      (removed.length===1?"the card you removed":"the cards you removed")+
+      ". They'll be moved to \u201c"+names[0]+"\u201d. Continue?"))return;
+
+  var prev=state.cards.slice();
   state.cards=names;
-  // rename fills positionally where a card was renamed
-  var renames=[];
-  old.forEach(function(o,i){if(names[i]&&names[i]!==o)renames.push([o,names[i]]);});
   var chain=saveSettings();
-  renames.forEach(function(pair){
-    chain=chain.then(function(){return sb.from("fills").update({card:pair[1]}).eq("card",pair[0]);})
-               .then(function(){return sb.from("charges").update({card:pair[1]}).eq("card",pair[0]);});
-  });
-  chain.then(function(){
-    renames.forEach(function(p){
-      state.fills.forEach(function(f){if(f.card===p[0])f.card=p[1]});
-      state.charges.forEach(function(c){if(c.card===p[0])c.card=p[1]});});
-    view="all";$("cardForm").classList.add("hidden");render();
-  }).catch(function(e){msg($("cardErr"),e.message,"warn");});
+  renames.forEach(function(pr){
+    chain=chain.then(function(){return sb.from("fills").update({card:pr[1]}).eq("card",pr[0]);})
+               .then(function(){return sb.from("charges").update({card:pr[1]}).eq("card",pr[0]);});});
+  removed.forEach(function(c){
+    chain=chain.then(function(){return sb.from("fills").update({card:names[0]}).eq("card",c);})
+               .then(function(){return sb.from("charges").update({card:names[0]}).eq("card",c);});});
+  chain.then(function(){return loadAll();})
+    .then(function(){view="all";$("cardForm").classList.add("hidden");render();})
+    .catch(function(e){state.cards=prev;msg($("cardErr"),e.message,"warn");});
 }
 
 /* ---------- export / import / delete ---------- */
@@ -740,6 +805,8 @@ $("fSave").addEventListener("click",saveFill);
 ["fLitres","fFore","fDate"].forEach(function(id){$(id).addEventListener("input",fillCalc);$(id).addEventListener("change",fillCalc);});
 $("manageCards").addEventListener("click",openCards);
 $("cardCancel").addEventListener("click",function(){$("cardForm").classList.add("hidden")});
+$("cardAdd").addEventListener("click",function(){cardDraft.push({orig:null,name:""});renderCardList();
+  var ins=$("cardList").querySelectorAll("input");if(ins.length)ins[ins.length-1].focus();});
 $("cardSave").addEventListener("click",saveCards);
 $("addCharge").addEventListener("click",openCharge);
 $("cCancel").addEventListener("click",function(){$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden")});
