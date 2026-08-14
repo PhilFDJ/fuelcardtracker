@@ -220,19 +220,25 @@
         <div class="big saved" id="balSaved" style="margin-top:10px">&pound;0.00</div>
         <div class="hint" id="balSavedSub" style="margin-top:8px"></div>
       </div>
-      <button class="btn" id="addCharge">Add a service charge</button>
+      <button class="btn" id="addCharge">Add a charge or refund</button>
       <div class="form hidden" id="chargeForm">
         <div class="two">
           <div class="field"><label class="label" for="cDate">Date</label><input class="input" id="cDate" type="date"></div>
           <div class="field"><label class="label" for="cAmt">Amount &pound;</label><input class="input" id="cAmt" type="number" step="0.01" inputmode="decimal" placeholder="22.00"></div>
         </div>
+        <div class="field"><label class="label">Type</label>
+          <span class="cardsel" style="margin-top:0">
+            <button id="cKindChg" aria-pressed="true">Charge</button>
+            <button id="cKindRef" aria-pressed="false">Refund</button>
+          </span>
+          <div class="hint" id="cKindHint">Money taken off you \u2014 adds to what you owe.</div></div>
         <div class="field"><label class="label" for="cNote">Note</label><input class="input txt" id="cNote" type="text" placeholder="Weekly service charge"></div>
         <div class="warn hidden" id="cErr"></div>
         <div class="row" style="margin-top:16px">
           <button class="btn primary" id="cSave">Save charge</button>
           <button class="btn" id="cCancel" style="flex:0 0 96px">Cancel</button></div>
       </div>
-      <div class="section"><div class="eyebrow">Service charges</div><div class="eyebrow" id="chargeCount">0</div></div>
+      <div class="section"><div class="eyebrow">Charges &amp; refunds</div><div class="eyebrow" id="chargeCount">0</div></div>
       <div class="rule"></div><div id="chargeBlock"></div>
       <div class="settings"><span>Show prices</span>
         <span class="cardsel" style="margin-top:0;flex:0 0 auto">
@@ -528,19 +534,24 @@ function renderBalance(){
   visibleFills().forEach(function(f){var s=fillSaving(f);if(s!==null){gross+=s;n++;}});
   var chg=state.charges.filter(inView).reduce(function(a,c){return a+c.amount},0);
   $("balSaved").textContent=money(gross-chg);
-  $("balSavedSub").textContent=n?("Across "+n+" fill-up"+(n===1?"":"s")+", after "+money(chg)+" of service charges."):"Log a pump price with each fill to track this.";
+  $("balSavedSub").textContent=n
+    ?("Across "+n+" fill-up"+(n===1?"":"s")+", "+(chg>0?"after "+money(chg)+" of charges.":chg<0?"including "+money(-chg)+" of refunds.":"with no charges or refunds."))
+    :"Log a pump price with each fill to track this.";
   var cs=state.charges.filter(inView).slice().sort(function(a,b){return(a.date||"")<(b.date||"")?1:-1});
   $("chargeCount").textContent=cs.length;
-  if(!cs.length){$("chargeBlock").innerHTML='<div class="empty">No service charges logged.</div>';return;}
+  if(!cs.length){$("chargeBlock").innerHTML='<div class="empty">Nothing logged. Add a service charge, or a refund when one comes back.</div>';return;}
   var ul=document.createElement("ul");ul.className="hist";
   cs.forEach(function(c){
     var li=document.createElement("li");
     var m=document.createElement("div");m.className="fmain";
-    var l1=document.createElement("div");l1.className="f1";l1.textContent=money(c.amount);
+    var ref=c.amount<0;
+    var l1=document.createElement("div");l1.className="f1";
+    if(ref)l1.style.color="var(--go)";
+    l1.textContent=(ref?"+":"")+money(Math.abs(c.amount));
     var l2=document.createElement("div");l2.className="f2";
-    l2.textContent=[c.date?shortDate(c.date):"no date",c.note||"service charge"].join(" \u00b7 ");
+    l2.textContent=[c.date?shortDate(c.date):"no date",ref?"refund":"charge",c.note||""].filter(Boolean).join(" \u00b7 ");
     m.appendChild(l1);m.appendChild(l2);
-    var pd=document.createElement("button");pd.className="chip "+(c.paid?"on":"off");pd.textContent=c.paid?"paid":"due";
+    var pd=document.createElement("button");pd.className="chip "+(c.paid?"on":"off");pd.textContent=c.paid?(ref?"received":"paid"):(ref?"pending":"due");
     pd.addEventListener("click",function(){
       guard(sb.from("charges").update({paid:!c.paid}).eq("id",c.id),function(){c.paid=!c.paid;render();});});
     var b=document.createElement("button");b.className="icon";b.textContent="\u00d7";
@@ -615,13 +626,21 @@ function saveFill(){
     $("fillForm").classList.add("hidden");$("addFill").classList.remove("hidden");render();});
 }
 
-function openCharge(){$("cDate").value=iso(new Date());$("cAmt").value="";$("cNote").value="";
+var chargeKind="charge";
+function setChargeKind(k){chargeKind=k;
+  $("cKindChg").setAttribute("aria-pressed",k==="charge");
+  $("cKindRef").setAttribute("aria-pressed",k==="refund");
+  $("cKindHint").textContent=k==="refund"
+    ? "Money coming back to you \u2014 reduces what you owe and counts towards your savings."
+    : "Money taken off you \u2014 adds to what you owe.";}
+function openCharge(){$("cDate").value=iso(new Date());$("cAmt").value="";$("cNote").value="";setChargeKind("charge");
   msg($("cErr"),"","warn");$("chargeForm").classList.remove("hidden");$("addCharge").classList.add("hidden");$("cAmt").focus();}
 function saveCharge(){
   var a=parseFloat($("cAmt").value);
-  if(isNaN(a)||a===0){msg($("cErr"),"Enter the charge amount in pounds.","warn");return;}
+  if(isNaN(a)||a===0){msg($("cErr"),"Enter the amount in pounds.","warn");return;}
+  a=Math.abs(a)*(chargeKind==="refund"?-1:1);
   var rec={user_id:user.id,card:view==="all"?state.cards[0]:view,charge_date:$("cDate").value||null,
-    amount:+Math.abs(a).toFixed(2),note:$("cNote").value.trim().slice(0,60),paid:false};
+    amount:+a.toFixed(2),note:$("cNote").value.trim().slice(0,60),paid:false};
   guard(sb.from("charges").insert(rec).select(),function(r){
     var c=r.data[0];
     state.charges.push({id:c.id,card:c.card,date:c.charge_date?String(c.charge_date).slice(0,10):null,
@@ -724,6 +743,8 @@ $("cardCancel").addEventListener("click",function(){$("cardForm").classList.add(
 $("cardSave").addEventListener("click",saveCards);
 $("addCharge").addEventListener("click",openCharge);
 $("cCancel").addEventListener("click",function(){$("chargeForm").classList.add("hidden");$("addCharge").classList.remove("hidden")});
+$("cKindChg").addEventListener("click",function(){setChargeKind("charge")});
+$("cKindRef").addEventListener("click",function(){setChargeKind("refund")});
 $("cSave").addEventListener("click",saveCharge);
 $("vatSave").addEventListener("click",function(){
   var v=parseFloat($("vatInput").value);
