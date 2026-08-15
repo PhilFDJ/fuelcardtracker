@@ -86,6 +86,7 @@
   .linkbtn.danger{color:var(--stop)}
   .warn{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(255,122,102,.1);border:1px solid rgba(255,122,102,.3);color:var(--stop);font-size:12.5px;line-height:1.45}
   .ok{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(69,214,160,.1);border:1px solid rgba(69,214,160,.3);color:var(--go);font-size:12.5px;line-height:1.45}
+  .offline{margin-bottom:14px;padding:10px 13px;border-radius:10px;background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.35);color:var(--amber);font-size:12px;line-height:1.45}
   .hidden{display:none!important}
   .backup{margin-top:20px;display:flex;gap:16px;font-size:12.5px;flex-wrap:wrap}
   .cardsel{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
@@ -130,6 +131,7 @@
 
   <!-- ===== APP ===== -->
   <div id="scrApp" class="hidden">
+    <div class="offline hidden" id="offlineBar"></div>
     <div class="who"><span id="whoAmI"></span><button class="linkbtn" id="signOut">Sign out</button></div>
 
     <div class="eyebrow" id="basisEyebrow">Fuel card &middot; &pound; per litre ex VAT</div>
@@ -312,8 +314,18 @@ function boot(){
 function afterLogin(){
   show("scrLoad");
   $("whoAmI").textContent=user.email;
-  loadAll().then(function(){show("scrApp");render();})
-  .catch(function(e){show("scrAuth");msg($("authErr"),"Couldn't load your data: "+e.message,"warn");});
+  loadAll().then(function(){
+    setOffline(false);writeCache();show("scrApp");render();
+  }).catch(function(e){
+    var c=readCache();
+    if(c){
+      state.vat=c.vat;state.cards=c.cards;state.showIncVat=!!c.showIncVat;
+      state.rates=c.rates||[];state.fills=c.fills||[];state.charges=c.charges||[];
+      setOffline(true,c.at);show("scrApp");render();
+    }else{
+      show("scrAuth");msg($("authErr"),"Couldn't load your data: "+e.message,"warn");
+    }
+  });
 }
 
 /* ---------- auth ---------- */
@@ -381,9 +393,18 @@ function loadAll(){
 }
 function guard(p,onOk){
   if(busy)return;busy=true;
-  p.then(function(r){busy=false;if(r&&r.error)throw r.error;if(onOk)onOk(r);})
+  p.then(function(r){busy=false;if(r&&r.error)throw r.error;if(onOk)onOk(r);writeCache();})
    .catch(function(e){busy=false;alert("Couldn't save: "+e.message);});
 }
+function cacheKey(){return "fuelcard.cache."+user.id;}
+function writeCache(){try{localStorage.setItem(cacheKey(),JSON.stringify({
+  at:Date.now(),vat:state.vat,cards:state.cards,showIncVat:state.showIncVat,
+  rates:state.rates,fills:state.fills,charges:state.charges}));}catch(e){}}
+function readCache(){try{var r=localStorage.getItem(cacheKey());return r?JSON.parse(r):null;}catch(e){return null;}}
+function setOffline(on,when){
+  var el=$("offlineBar");el.classList.toggle("hidden",!on);
+  if(on){var ago=when?new Date(when).toLocaleString("en-GB",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}):"earlier";
+    el.textContent="Offline \u2014 showing your data as of "+ago+". Anything you add won't save until you reconnect.";}}
 function saveSettings(){return sb.from("settings").upsert({user_id:user.id,vat:state.vat,cards:state.cards,show_inc_vat:state.showIncVat});}
 
 /* ---------- derived ---------- */
@@ -789,7 +810,9 @@ $("authGo").addEventListener("click",doAuth);
 $("authSwap").addEventListener("click",function(){setMode(mode==="signin"?"signup":"signin")});
 $("authReset").addEventListener("click",doReset);
 $("pw").addEventListener("keydown",function(e){if(e.key==="Enter")doAuth()});
-$("signOut").addEventListener("click",function(){sb.auth.signOut()});
+$("signOut").addEventListener("click",function(){
+  try{if(user)localStorage.removeItem(cacheKey());}catch(e){}
+  setOffline(false);sb.auth.signOut();});
 $("tabRates").addEventListener("click",function(){showTab("rates")});
 $("tabFills").addEventListener("click",function(){showTab("fills")});
 $("tabBal").addEventListener("click",function(){showTab("bal")});
@@ -826,6 +849,9 @@ $("importBtn").addEventListener("click",function(){$("importFile").click()});
 $("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
 $("deleteAcct").addEventListener("click",deleteAccount);
 
+window.addEventListener("online",function(){
+  if(user&&!$("offlineBar").classList.contains("hidden")){
+    loadAll().then(function(){setOffline(false);writeCache();render();}).catch(function(){});}});
 setMode("signin");
 boot();
 })();
