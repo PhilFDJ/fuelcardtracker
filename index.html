@@ -87,6 +87,7 @@
   .warn{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(255,122,102,.1);border:1px solid rgba(255,122,102,.3);color:var(--stop);font-size:12.5px;line-height:1.45}
   .ok{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(69,214,160,.1);border:1px solid rgba(69,214,160,.3);color:var(--go);font-size:12.5px;line-height:1.45}
   .offline{margin-bottom:14px;padding:10px 13px;border-radius:10px;background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.35);color:var(--amber);font-size:12px;line-height:1.45}
+  #fatal{margin-bottom:14px;padding:12px 14px;border-radius:10px;background:rgba(255,122,102,.12);border:1px solid rgba(255,122,102,.4);color:var(--stop);font-size:12px;line-height:1.5;word-break:break-word}
   .hidden{display:none!important}
   .backup{margin-top:20px;display:flex;gap:16px;font-size:12.5px;flex-wrap:wrap}
   .cardsel{display:flex;gap:6px;margin-top:14px;flex-wrap:wrap}
@@ -100,6 +101,7 @@
 </head>
 <body>
 <div class="wrap">
+  <div id="fatal" class="hidden"></div>
 
   <!-- ===== NOT CONFIGURED ===== -->
   <div id="scrSetup" class="hidden">
@@ -254,6 +256,15 @@
         </span>
       </div>
       <div class="hint" id="basisHint" style="margin-top:-8px"></div>
+      <div id="remindBlock">
+        <div class="section"><div class="eyebrow">Reminders</div></div>
+        <div class="rule"></div>
+        <div class="settings" style="margin-top:0"><span>Friday \u2014 log the new rate</span>
+          <input class="input" id="remFri" type="time" style="width:118px;padding:7px 10px;font-size:14px"></div>
+        <div class="settings"><span>Sunday \u2014 chase or fill up</span>
+          <input class="input" id="remSun" type="time" style="width:118px;padding:7px 10px;font-size:14px"></div>
+        <div class="hint" id="remindHint"></div>
+      </div>
       <div class="settings"><span>VAT rate</span>
         <span class="row"><input class="input" id="vatInput" type="number" step="1" inputmode="decimal" style="width:70px;padding:7px 10px;font-size:14px"><button class="linkbtn" id="vatSave">%</button></span>
       </div>
@@ -272,7 +283,8 @@
   <div id="scrLoad" class="spinner">Loading&hellip;</div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script>if(!window.supabase){document.write('<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><\/script>');}</script>
 <script>
 /* ============================================================
    PASTE YOUR TWO SUPABASE VALUES HERE
@@ -281,6 +293,14 @@
 var SUPABASE_URL      = "https://zrbvbxgogtzbuiberjee.supabase.co";
 var SUPABASE_ANON_KEY = "sb_publishable_k0my-XZ-Lck-OCDJIxsoCQ_7FgQzbVm";
 /* ========================================================== */
+
+function fatal(m){try{var el=document.getElementById("fatal");
+  if(!el)return;el.classList.remove("hidden");
+  el.textContent="Something broke: "+m+" \u2014 screenshot this.";
+  var sp=document.getElementById("scrLoad");if(sp)sp.classList.add("hidden");}catch(e){}}
+window.addEventListener("error",function(e){fatal((e.message||"unknown")+" @ "+(e.filename||"?")+":"+(e.lineno||0));});
+window.addEventListener("unhandledrejection",function(e){
+  var r=e.reason;fatal("promise: "+((r&&r.message)||String(r)));});
 
 (function(){
 "use strict";
@@ -302,6 +322,9 @@ function msg(el,text,cls){el.textContent=text;el.className=cls+(text?"":" hidden
 /* ---------- boot ---------- */
 function boot(){
   if(SUPABASE_URL.indexOf("PASTE")===0||SUPABASE_ANON_KEY.indexOf("PASTE")===0){show("scrSetup");return;}
+  if(!window.supabase||!window.supabase.createClient){
+    fatal("the Supabase library didn't load. In the app, check supabase.js sits next to index.html in www/.");
+    return;}
   sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
   sb.auth.getSession().then(function(r){
     if(r.data&&r.data.session){user=r.data.session.user;afterLogin();}
@@ -426,11 +449,108 @@ function sumBetween(a,b){var s=0;visibleFills().forEach(function(f){
 function avgLitres(){var f=visibleFills().slice().sort(function(a,b){return a.date<b.date?1:-1}).slice(0,6);
   if(f.length<2)return null;return f.reduce(function(a,x){return a+x.litres},0)/f.length;}
 
+/* ---------- native bridge (iOS app only; no-ops on the web) ---------- */
+function isNative(){try{
+  var C=window.Capacitor;if(!C)return false;
+  if(typeof C.isNativePlatform==="function")return !!C.isNativePlatform();
+  if(typeof C.getPlatform==="function")return C.getPlatform()!=="web";
+  if(C.platform)return C.platform!=="web";
+  return false;}catch(e){return false;}}
+function platformName(){try{
+  var C=window.Capacitor;if(!C)return "browser";
+  if(typeof C.getPlatform==="function")return C.getPlatform();
+  return C.platform||"browser";}catch(e){return "browser";}}
+function plug(name){try{return (window.Capacitor&&window.Capacitor.Plugins)?window.Capacitor.Plugins[name]:null;}catch(e){return null;}}
+
+function verdictNow(){
+  var today=new Date(),thisMon=mondayOf(today),nextMon=new Date(thisMon.getTime()+7*DAY);
+  var cur=state.rates.filter(function(r){return r.weekStart===iso(thisMon)})[0];
+  var nxt=state.rates.filter(function(r){return r.weekStart===iso(nextMon)})[0];
+  var o={hasCur:!!cur,hasNext:!!nxt,
+         current:cur?shown(cur.exVat).toFixed(4):null,next:nxt?shown(nxt.exVat).toFixed(4):null,
+         basis:basis(),state:"idle",text:"Log this week's rate",swing:0,updated:new Date().toISOString()};
+  if(cur&&!nxt){o.state="idle";o.text="Awaiting Friday's rate";}
+  else if(cur&&nxt){
+    var diff=incVat(nxt.exVat)-incVat(cur.exVat);
+    o.swing=+(Math.abs(diff)*100).toFixed(2);
+    if(Math.abs(diff)<0.0005){o.state="flat";o.text="No change Monday";}
+    else if(diff<0){o.state="wait";o.text="Hold for Monday";}
+    else{o.state="fill";o.text="Fill before Sunday";}
+  }
+  return o;
+}
+
+function pushWidget(v){
+  var pref=plug("Preferences");if(!pref)return;
+  try{pref.set({key:"fuelcard_widget",value:JSON.stringify(v)});}catch(e){}
+}
+
+var RKEY="fuelcard.reminders";
+function reminders(){
+  try{var r=JSON.parse(localStorage.getItem(RKEY));
+    if(r&&r.fri&&r.sun)return r;}catch(e){}
+  return {fri:"19:30",sun:"15:00"};
+}
+function setReminders(r){try{localStorage.setItem(RKEY,JSON.stringify(r));}catch(e){}}
+function hm(t){var a=String(t).split(":");return{h:parseInt(a[0],10)||0,m:parseInt(a[1],10)||0};}
+
+function comingSunday(hour,minute){
+  var d=new Date();
+  var days=(7-d.getDay())%7;              // 0 = Sunday
+  var t=new Date(d.getFullYear(),d.getMonth(),d.getDate()+days,hour,minute||0,0);
+  if(t<=d)t=new Date(t.getTime()+7*DAY);
+  return t;
+}
+
+function scheduleAlerts(v){
+  var LN=plug("LocalNotifications");if(!LN)return;
+  LN.checkPermissions().then(function(p){
+    return p.display==="granted"?p:LN.requestPermissions();
+  }).then(function(p){
+    if(p.display!=="granted")return;
+    return LN.cancel({notifications:[{id:1},{id:2}]}).catch(function(){}).then(function(){
+      var r=reminders(),f=hm(r.fri),u=hm(r.sun);
+      var list=[{
+        id:1,title:"New rate due",
+        body:"Friday's fuel card email should be in \u2014 log the new rate to see whether to fill now or wait.",
+        schedule:{on:{weekday:6,hour:f.h,minute:f.m},allowWhileIdle:true}
+      }];
+      if(!v.hasNext){
+        list.push({id:2,title:"Still no rate for next week",
+          body:"Nothing logged for the week starting tomorrow. Check Friday's email and add it.",
+          schedule:{at:comingSunday(u.h,u.m),allowWhileIdle:true}});
+      }else if(v.state==="fill"){
+        list.push({id:2,title:"Last day at this rate",
+          body:"Rate rises "+v.swing.toFixed(2)+"p a litre from tomorrow. Fill up before midnight.",
+          schedule:{at:comingSunday(u.h,u.m),allowWhileIdle:true}});
+      }
+      return LN.schedule({notifications:list});
+    });
+  }).catch(function(){});
+}
+
+function renderReminders(){
+  var r=reminders();
+  if(!$("remFri").value)$("remFri").value=r.fri;
+  if(!$("remSun").value)$("remSun").value=r.sun;
+  $("remindHint").textContent=isNative()
+    ? "The Friday nudge repeats weekly. The Sunday one only fires if next week's rate is still missing, or if it's going up and you should fill before midnight."
+    : "Reminders only fire in the iPhone app \u2014 this looks like "+platformName()+". Your times are saved and will apply there.";
+}
+function syncNative(){
+  if(!isNative())return;
+  var v=verdictNow();
+  pushWidget(v);
+  scheduleAlerts(v);
+}
+
 /* ---------- render ---------- */
 function render(){renderTotem();renderRates();renderTrend();renderCardSel();renderFills();renderBalance();
   $("vatInput").value=Math.round(state.vat*100);
   $("basisEx").setAttribute("aria-pressed",!state.showIncVat);
   $("basisInc").setAttribute("aria-pressed",state.showIncVat);
+  renderReminders();
+  syncNative();
   $("basisHint").textContent=state.showIncVat
     ? "Rates are shown and entered including VAT \u2014 the price you actually pay. Choose this if you're not VAT registered."
     : "Rates are shown and entered excluding VAT, as they appear on your statement. Choose this if you reclaim VAT.";}
@@ -844,6 +964,12 @@ function setBasis(inc){if(state.showIncVat===inc)return;state.showIncVat=inc;
   guard(saveSettings(),function(){render();});}
 $("basisEx").addEventListener("click",function(){setBasis(false)});
 $("basisInc").addEventListener("click",function(){setBasis(true)});
+function onRemindChange(){
+  var f=$("remFri").value||"19:30",u=$("remSun").value||"15:00";
+  setReminders({fri:f,sun:u});
+  if(isNative())scheduleAlerts(verdictNow());}
+$("remFri").addEventListener("change",onRemindChange);
+$("remSun").addEventListener("change",onRemindChange);
 $("exportBtn").addEventListener("click",exportData);
 $("importBtn").addEventListener("click",function(){$("importFile").click()});
 $("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
