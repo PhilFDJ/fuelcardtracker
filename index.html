@@ -86,6 +86,14 @@
   .linkbtn.danger{color:var(--stop)}
   .warn{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(255,122,102,.1);border:1px solid rgba(255,122,102,.3);color:var(--stop);font-size:12.5px;line-height:1.45}
   .ok{margin-top:14px;padding:11px 13px;border-radius:10px;background:rgba(69,214,160,.1);border:1px solid rgba(69,214,160,.3);color:var(--go);font-size:12.5px;line-height:1.45}
+  .pro{margin-top:16px;padding:20px 18px;border:1px solid rgba(242,179,61,.4);border-radius:14px;background:linear-gradient(180deg,rgba(242,179,61,.10),rgba(242,179,61,.03))}
+  .pro h3{font-family:'Archivo',sans-serif;font-size:19px;font-weight:800;margin:6px 0 4px}
+  .pro ul{list-style:none;padding:0;margin:14px 0 0}
+  .pro li{font-size:13px;color:var(--ink);padding:5px 0 5px 22px;position:relative;line-height:1.45}
+  .pro li:before{content:"\2713";position:absolute;left:0;color:var(--go);font-weight:700}
+  .prolinks{margin-top:14px;font-size:11px;color:var(--mute);line-height:1.6}
+  .prolinks a{color:var(--mute)}
+  .locked{opacity:.45;pointer-events:none}
   .offline{margin-bottom:14px;padding:10px 13px;border-radius:10px;background:rgba(242,179,61,.1);border:1px solid rgba(242,179,61,.35);color:var(--amber);font-size:12px;line-height:1.45}
   #fatal{margin-bottom:14px;padding:12px 14px;border-radius:10px;background:rgba(255,122,102,.12);border:1px solid rgba(255,122,102,.4);color:var(--stop);font-size:12px;line-height:1.5;word-break:break-word}
   .hidden{display:none!important}
@@ -128,6 +136,7 @@
     <div class="legal" id="privacy">
       <b>What this stores.</b> Your email address, and the fuel data you enter: weekly rates, fill-up dates, litres, locations, prices and whether each one is paid. Nothing else &mdash; no card numbers, no payment details, no tracking.<br><br>
       Your data is visible only to you. You can export it or delete your account and everything in it at any time from the Balance tab.
+      <div style="margin-top:14px;opacity:.65">build 2026-08-17-b</div>
     </div>
   </div>
 
@@ -160,9 +169,9 @@
     <div id="paneRates">
       <button class="btn primary" id="addRate">Log Friday's rate</button>
       <div class="form hidden" id="rateForm">
-        <div class="field"><label class="label" for="rateVal"><span id="rateValLabel">Card cost ex VAT</span> (&pound; per litre)</label>
+        <div class="field"><label class="label" for="rateVal">Card cost ex VAT (&pound; per litre)</label>
           <input class="input" id="rateVal" type="number" step="0.0001" inputmode="decimal" placeholder="1.4364">
-          <div class="hint" id="rateCalc"></div></div>
+          <div class="hint" id="rateCalc"></div><div class="hint" id="rateEntryNote"></div></div>
         <div class="field"><label class="label" for="rateWeek">Week it takes effect</label>
           <input class="input" id="rateWeek" type="date"><div class="hint" id="rateHint"></div></div>
         <div class="warn hidden" id="rateErr"></div>
@@ -186,7 +195,7 @@
         <label class="label">Your cards</label>
         <div id="cardList"></div>
         <button class="btn" id="cardAdd" style="margin-top:10px">Add another card</button>
-        <div class="hint">Give each card a name you'll recognise \u2014 a driver, a vehicle, a reg. Renaming one updates every fill-up already logged against it.</div>
+        <div class="hint">Give each card a name you'll recognise &mdash; a driver, a vehicle, a reg. Renaming one updates every fill-up already logged against it.</div>
         <div class="warn hidden" id="cardErr"></div>
         <div class="row" style="margin-top:14px">
           <button class="btn primary" id="cardSave">Save cards</button>
@@ -199,7 +208,7 @@
           <div class="field"><label class="label" for="fLitres">Litres</label><input class="input" id="fLitres" type="number" step="0.01" inputmode="decimal" placeholder="62.36"></div>
         </div>
         <div class="two">
-          <div class="field"><label class="label" for="fFore">Pump price &pound;/L</label><input class="input" id="fFore" type="number" step="0.0001" inputmode="decimal" placeholder="1.8990"></div>
+          <div class="field"><label class="label" for="fFore">Pump price &pound;/L inc VAT</label><input class="input" id="fFore" type="number" step="0.0001" inputmode="decimal" placeholder="1.8990"></div>
           <div class="field"><label class="label" for="fCard">Card</label><select class="input" id="fCard"></select></div>
         </div>
         <div class="field"><label class="label" for="fLoc">Location</label><input class="input txt" id="fLoc" type="text" placeholder="Shell Towcester"></div>
@@ -240,7 +249,7 @@
             <button id="cKindChg" aria-pressed="true">Charge</button>
             <button id="cKindRef" aria-pressed="false">Refund</button>
           </span>
-          <div class="hint" id="cKindHint">Money taken off you \u2014 adds to what you owe.</div></div>
+          <div class="hint" id="cKindHint">Money taken off you &mdash; adds to what you owe.</div></div>
         <div class="field"><label class="label" for="cNote">Note</label><input class="input txt" id="cNote" type="text" placeholder="Weekly service charge"></div>
         <div class="warn hidden" id="cErr"></div>
         <div class="row" style="margin-top:16px">
@@ -256,12 +265,36 @@
         </span>
       </div>
       <div class="hint" id="basisHint" style="margin-top:-8px"></div>
+      <div class="pro hidden" id="proBlock">
+        <div class="eyebrow">Fuel Card Pro</div>
+        <h3 id="proPrice">&pound;&mdash; a year</h3>
+        <div class="hint" id="proTrial" style="margin-top:0"></div>
+        <ul>
+          <li>Friday and Sunday reminders, so the decision finds you</li>
+          <li>Home screen widget with this week's rate and verdict</li>
+          <li>Everything you log stays yours, subscribed or not</li>
+        </ul>
+        <button class="btn primary" id="proBuy">Subscribe</button>
+        <button class="linkbtn" id="proRestore" style="width:100%;margin-top:10px">Restore a previous purchase</button>
+        <div class="warn hidden" id="proErr"></div>
+        <div class="prolinks">
+          Renews yearly until cancelled. Cancel any time in your Apple account settings.
+          <a id="proTerms" href="#">Terms of Use</a> &middot; <a id="proPrivacy" href="#">Privacy Policy</a>
+        </div>
+      </div>
+
+      <div class="panel hidden" id="proActive">
+        <div class="eyebrow">Fuel Card Pro &middot; active</div>
+        <div class="hint" id="proUntil" style="margin-top:8px"></div>
+        <button class="linkbtn" id="proManage" style="padding:0;margin-top:10px">Manage subscription</button>
+      </div>
+
       <div id="remindBlock">
         <div class="section"><div class="eyebrow">Reminders</div></div>
         <div class="rule"></div>
-        <div class="settings" style="margin-top:0"><span>Friday \u2014 log the new rate</span>
+        <div class="settings" style="margin-top:0"><span>Friday &mdash; log the new rate</span>
           <input class="input" id="remFri" type="time" style="width:118px;padding:7px 10px;font-size:14px"></div>
-        <div class="settings"><span>Sunday \u2014 chase or fill up</span>
+        <div class="settings"><span>Sunday &mdash; chase or fill up</span>
           <input class="input" id="remSun" type="time" style="width:118px;padding:7px 10px;font-size:14px"></div>
         <div class="hint" id="remindHint"></div>
       </div>
@@ -276,6 +309,7 @@
       <div class="legal">
         <b>Your data.</b> Only you can see it. Export it any time above.<br><br>
         <button class="linkbtn danger" id="deleteAcct" style="padding:0">Delete my account and all my data</button>
+        <div style="margin-top:14px;opacity:.65">build 2026-08-17-b &middot; <span id="platStamp"></span><br><span id="widgetStamp" style="word-break:break-word"></span><br><span id="notifStamp" style="word-break:break-word"></span></div>
       </div>
     </div>
   </div>
@@ -292,6 +326,14 @@
    ============================================================ */
 var SUPABASE_URL      = "https://zrbvbxgogtzbuiberjee.supabase.co";
 var SUPABASE_ANON_KEY = "sb_publishable_k0my-XZ-Lck-OCDJIxsoCQ_7FgQzbVm";
+
+/* Subscription — must match the product ID you create in App Store Connect */
+var SUB_PRODUCT_ID = "uk.co.philfdj.fuelcard.yearly";
+var PRIVACY_URL    = "https://philfdj.github.io/fuelcardtracker/privacy.html";
+var TERMS_URL      = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
+
+/* true = the whole app needs a subscription. false = reminders and widget only. */
+var HARD_PAYWALL   = false;
 /* ========================================================== */
 
 function fatal(m){try{var el=document.getElementById("fatal");
@@ -307,6 +349,7 @@ window.addEventListener("unhandledrejection",function(e){
 var DAY=86400000;
 var sb=null, user=null, busy=false;
 var state={vat:0.20,cards:["Mine"],rates:[],fills:[],charges:[],showIncVat:false};
+var pro={active:false,price:null,trial:null,expires:null,missing:false,checked:false};
 var view="all", mode="signin";
 var $=function(id){return document.getElementById(id)};
 
@@ -338,7 +381,7 @@ function afterLogin(){
   show("scrLoad");
   $("whoAmI").textContent=user.email;
   loadAll().then(function(){
-    setOffline(false);writeCache();show("scrApp");render();
+    setOffline(false);writeCache();show("scrApp");render();refreshPro();
   }).catch(function(e){
     var c=readCache();
     if(c){
@@ -460,7 +503,16 @@ function platformName(){try{
   var C=window.Capacitor;if(!C)return "browser";
   if(typeof C.getPlatform==="function")return C.getPlatform();
   return C.platform||"browser";}catch(e){return "browser";}}
-function plug(name){try{return (window.Capacitor&&window.Capacitor.Plugins)?window.Capacitor.Plugins[name]:null;}catch(e){return null;}}
+var _plugs={};
+function plug(name){
+  try{
+    if(_plugs[name]!==undefined)return _plugs[name];
+    var C=window.Capacitor;if(!C){return (_plugs[name]=null);}
+    var p=(C.Plugins&&C.Plugins[name])||null;
+    if(!p&&typeof C.registerPlugin==="function"){try{p=C.registerPlugin(name);}catch(e){p=null;}}
+    return (_plugs[name]=p||null);
+  }catch(e){return null;}
+}
 
 function verdictNow(){
   var today=new Date(),thisMon=mondayOf(today),nextMon=new Date(thisMon.getTime()+7*DAY);
@@ -480,9 +532,24 @@ function verdictNow(){
   return o;
 }
 
+var APP_GROUP="group.uk.co.philfdj.fuelcard";
+function wstat(t){try{var el=$("widgetStamp");if(el)el.textContent="widget: "+t;}catch(e){}}
+function bridge(){return plug("FuelWidget");}
 function pushWidget(v){
-  var pref=plug("Preferences");if(!pref)return;
-  try{pref.set({key:"fuelcard_widget",value:JSON.stringify(v)});}catch(e){}
+  var payload=JSON.stringify(v);
+  var wb=bridge();
+  if(!wb){
+    wstat("FuelWidget plugin not found \u2014 is FuelWidgetPlugin.swift in the App target?");
+    return;
+  }
+  try{
+    wb.set({value:payload,group:APP_GROUP}).then(function(r){
+      var t=new Date().toLocaleTimeString("en-GB");
+      wstat((r&&r.ok)
+        ? "shared "+t+" \u00b7 "+(v.current||"no rate")
+        : "wrote but read back wrong at "+t);
+    }).catch(function(e){wstat("share failed: "+((e&&e.message)||e));});
+  }catch(e){wstat("threw: "+e.message);}
 }
 
 var RKEY="fuelcard.reminders";
@@ -502,12 +569,14 @@ function comingSunday(hour,minute){
   return t;
 }
 
+function nstat(t){try{var el=$("notifStamp");if(el)el.textContent="alerts: "+t;}catch(e){}}
 function scheduleAlerts(v){
-  var LN=plug("LocalNotifications");if(!LN)return;
+  var LN=plug("LocalNotifications");
+  if(!LN){nstat("LocalNotifications plugin not reachable");return;}
   LN.checkPermissions().then(function(p){
     return p.display==="granted"?p:LN.requestPermissions();
   }).then(function(p){
-    if(p.display!=="granted")return;
+    if(p.display!=="granted"){nstat("permission not granted");return;}
     return LN.cancel({notifications:[{id:1},{id:2}]}).catch(function(){}).then(function(){
       var r=reminders(),f=hm(r.fri),u=hm(r.sun);
       var list=[{
@@ -524,21 +593,87 @@ function scheduleAlerts(v){
           body:"Rate rises "+v.swing.toFixed(2)+"p a litre from tomorrow. Fill up before midnight.",
           schedule:{at:comingSunday(u.h,u.m),allowWhileIdle:true}});
       }
-      return LN.schedule({notifications:list});
+      return LN.schedule({notifications:list}).then(function(){
+        nstat("scheduled "+list.length+" \u00b7 Fri "+r.fri+(list.length>1?", Sun "+r.sun:""));
+      });
     });
-  }).catch(function(){});
+  }).catch(function(e){nstat("failed: "+((e&&e.message)||e));});
 }
 
 function renderReminders(){
   var r=reminders();
   if(!$("remFri").value)$("remFri").value=r.fri;
   if(!$("remSun").value)$("remSun").value=r.sun;
-  $("remindHint").textContent=isNative()
+  $("remindBlock").classList.toggle("locked",gated());
+  $("remindHint").textContent=gated()
+    ? "Reminders are part of Fuel Card Pro."
+    : isNative()
     ? "The Friday nudge repeats weekly. The Sunday one only fires if next week's rate is still missing, or if it's going up and you should fill before midnight."
     : "Reminders only fire in the iPhone app \u2014 this looks like "+platformName()+". Your times are saved and will apply there.";
 }
+function gated(){return isNative()&&!pro.active;}
+
+function refreshPro(){
+  var S=plug("Subscription");
+  if(!S){pro.checked=true;renderPro();return;}
+  S.status({productId:SUB_PRODUCT_ID}).then(function(r){
+    pro.active=!!(r&&r.active);
+    pro.price=(r&&r.price)||null;
+    pro.trial=(r&&r.trial)||null;
+    pro.expires=(r&&r.expires)||null;
+    pro.missing=!!(r&&r.productMissing);
+    pro.checked=true;
+    renderPro();render();
+  }).catch(function(){pro.checked=true;renderPro();});
+}
+
+function renderPro(){
+  var show=isNative()&&pro.checked;
+  $("proBlock").classList.toggle("hidden",!(show&&!pro.active));
+  $("proActive").classList.toggle("hidden",!(show&&pro.active));
+  if(pro.price)$("proPrice").textContent=pro.price+" a year";
+  $("proTrial").textContent=pro.trial
+    ? pro.trial+" free, then "+(pro.price||"the yearly price")+". Cancel any time."
+    : (pro.missing?"Product not found \u2014 check the ID in App Store Connect.":"");
+  if(pro.expires){
+    var d=new Date(pro.expires);
+    $("proUntil").textContent="Renews "+d.toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})+".";
+  }
+  $("proTerms").href=TERMS_URL;
+  $("proPrivacy").href=PRIVACY_URL;
+}
+
+function buyPro(){
+  var S=plug("Subscription");if(!S)return;
+  msg($("proErr"),"","warn");
+  $("proBuy").disabled=true;
+  S.purchase({productId:SUB_PRODUCT_ID}).then(function(r){
+    $("proBuy").disabled=false;
+    if(r&&r.active){refreshPro();return;}
+    if(r&&r.pending)msg($("proErr"),"Waiting on approval \u2014 this can take a moment.","warn");
+  }).catch(function(e){
+    $("proBuy").disabled=false;
+    msg($("proErr"),((e&&e.message)||e),"warn");
+  });
+}
+
+function restorePro(){
+  var S=plug("Subscription");if(!S)return;
+  msg($("proErr"),"","warn");
+  S.restore({productId:SUB_PRODUCT_ID}).then(function(r){
+    if(r&&r.active)refreshPro();
+    else msg($("proErr"),"No active subscription found on this Apple account.","warn");
+  }).catch(function(e){msg($("proErr"),((e&&e.message)||e),"warn");});
+}
+
 function syncNative(){
   if(!isNative())return;
+  if(gated()){
+    wstat("included with Pro");nstat("included with Pro");
+    var LN0=plug("LocalNotifications");
+    if(LN0)LN0.cancel({notifications:[{id:1},{id:2}]}).catch(function(){});
+    return;
+  }
   var v=verdictNow();
   pushWidget(v);
   scheduleAlerts(v);
@@ -549,11 +684,21 @@ function render(){renderTotem();renderRates();renderTrend();renderCardSel();rend
   $("vatInput").value=Math.round(state.vat*100);
   $("basisEx").setAttribute("aria-pressed",!state.showIncVat);
   $("basisInc").setAttribute("aria-pressed",state.showIncVat);
+  try{$("platStamp").textContent=platformName();}catch(e){}
   renderReminders();
+  renderPro();
+  if(HARD_PAYWALL&&gated()){
+    ["paneRates","paneFills"].forEach(function(id){$(id).classList.add("hidden")});
+    $("tabRates").setAttribute("aria-selected","false");
+    $("tabFills").setAttribute("aria-selected","false");
+    $("tabBal").setAttribute("aria-selected","true");
+    $("paneBal").classList.remove("hidden");
+  }
   syncNative();
-  $("basisHint").textContent=state.showIncVat
-    ? "Rates are shown and entered including VAT \u2014 the price you actually pay. Choose this if you're not VAT registered."
-    : "Rates are shown and entered excluding VAT, as they appear on your statement. Choose this if you reclaim VAT.";}
+  $("basisHint").textContent=(state.showIncVat
+    ? "Rates are displayed including VAT \u2014 the price you actually pay. Choose this if you're not VAT registered. "
+    : "Rates are displayed excluding VAT, as they appear on your statement. Choose this if you reclaim VAT. ")
+    +"Either way you always enter the ex-VAT figure from your email.";}
 
 function renderTotem(){
   var today=new Date(),tm=new Date(today.getFullYear(),today.getMonth(),today.getDate());
@@ -730,22 +875,20 @@ function renderBalance(){
 function openRate(){var tm=mondayOf(new Date()),nm=new Date(tm.getTime()+7*DAY);
   $("rateWeek").value=iso(state.rates.length===0?tm:nm);rateHint();$("rateVal").value="";
   msg($("rateErr"),"","warn");$("rateCalc").textContent="";
-  $("rateValLabel").textContent="Card cost "+basis();
   $("rateForm").classList.remove("hidden");$("addRate").classList.add("hidden");$("rateVal").focus();}
 function rateHint(){var v=$("rateWeek").value;
-  $("rateHint").textContent=v?"Snaps to the Monday. Runs "+shortDate(v)+" to the Sunday.":"";}
+  $("rateHint").textContent=v?"Snaps to the Monday. Runs "+shortDate(v)+" to the Sunday.":"";
+  $("rateEntryNote").textContent="Enter the figure exactly as it appears on your email \u2014 always excluding VAT, whether or not you're registered.";}
 function rateCalc(){var v=parseFloat($("rateVal").value);
   if(isNaN(v)||v<=0){$("rateCalc").textContent="";return;}
-  var conv=state.showIncVat?exVat(v):incVat(v);
-  $("rateCalc").textContent="= "+money(conv)+" a litre "+otherBasis()+" at "+Math.round(state.vat*100)+"% VAT.";}
+  $("rateCalc").textContent="= "+money(incVat(v))+" a litre inc VAT at "+Math.round(state.vat*100)+"% VAT \u2014 what you actually pay.";}
 function saveRate(){
   var v=parseFloat($("rateVal").value),err="";
-  if(isNaN(v)||v<=0)err="Enter the "+basis()+" rate in pounds, like "+(state.showIncVat?"1.7237":"1.4364");
+  if(isNaN(v)||v<=0)err="Enter the ex-VAT rate in pounds, like 1.4364";
   else if(v>5)err="That looks like pence. Enter pounds per litre, like 1.4364";
   else if(!$("rateWeek").value)err="Pick the week this rate starts.";
   if(err){msg($("rateErr"),err,"warn");return;}
   var wk=iso(mondayOf(fromIso($("rateWeek").value)));
-  if(state.showIncVat)v=exVat(v);
   guard(sb.from("rates").upsert({user_id:user.id,week_start:wk,ex_vat:+v.toFixed(4)},{onConflict:"user_id,week_start"}).select(),
     function(r){
       state.rates=state.rates.filter(function(x){return x.weekStart!==wk});
@@ -768,15 +911,15 @@ function fillCalc(){
   if(!d||isNaN(l)||l<=0){$("fCalc").textContent="";return;}
   var ex=rateFor(d);
   if(ex===null){$("fCalc").textContent="No rate logged for that week \u2014 add it on the Rates tab first.";return;}
-  var cost=l*incVat(ex),t="Card cost "+money(cost)+" ("+money(ex)+"/L ex VAT).";
-  if(!isNaN(fo)&&fo>0)t+=" Pump would be "+money(l*fo)+" \u2014 saving "+money(l*fo-cost)+".";
+  var cost=l*incVat(ex),t="Card cost "+money(cost)+" inc VAT ("+money(ex)+"/L ex VAT).";
+  if(!isNaN(fo)&&fo>0)t+=" At the pump that's "+money(l*fo)+" \u2014 saving "+money(l*fo-cost)+", both inc VAT.";
   $("fCalc").textContent=t;}
 function saveFill(){
   var l=parseFloat($("fLitres").value),d=$("fDate").value,fo=parseFloat($("fFore").value),err="";
   if(!d)err="Pick the date.";
   else if(isNaN(l)||l<=0)err="Enter how many litres went in.";
   else if(l>2000)err="That looks off for litres. Check the figure.";
-  else if($("fFore").value.trim()!==""&&(isNaN(fo)||fo<=0||fo>10))err="Pump price should be pounds per litre, like 1.8990";
+  else if($("fFore").value.trim()!==""&&(isNaN(fo)||fo<=0||fo>10))err="Pump price should be pounds per litre inc VAT, like 1.8990";
   if(err){msg($("fErr"),err,"warn");return;}
   var rec={user_id:user.id,card:$("fCard").value,fill_date:d,litres:+l.toFixed(2),
     location:$("fLoc").value.trim().slice(0,60),paid:false};
@@ -970,6 +1113,10 @@ function onRemindChange(){
   if(isNative())scheduleAlerts(verdictNow());}
 $("remFri").addEventListener("change",onRemindChange);
 $("remSun").addEventListener("change",onRemindChange);
+$("proBuy").addEventListener("click",buyPro);
+$("proRestore").addEventListener("click",restorePro);
+$("proManage").addEventListener("click",function(){
+  window.location.href="itms-apps://apps.apple.com/account/subscriptions";});
 $("exportBtn").addEventListener("click",exportData);
 $("importBtn").addEventListener("click",function(){$("importFile").click()});
 $("importFile").addEventListener("change",function(e){if(e.target.files&&e.target.files[0])importData(e.target.files[0]);e.target.value="";});
